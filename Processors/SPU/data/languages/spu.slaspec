@@ -1,0 +1,2039 @@
+define endian=big;
+define alignment=4;
+
+define space ram type=ram_space size=4 default;
+define space register type=register_space size=4;
+
+define register offset=0 size=16 [
+	lr   sp   r2   r3   r4   r5   r6   r7
+	r8   r9   r10  r11  r12  r13  r14  r15
+	r16  r17  r18  r19  r20  r21  r22  r23
+	r24  r25  r26  r27  r28  r29  r30  r31
+	r32  r33  r34  r35  r36  r37  r38  r39
+	r40  r41  r42  r43  r44  r45  r46  r47
+	r48  r49  r50  r51  r52  r53  r54  r55
+	r56  r57  r58  r59  r60  r61  r62  r63
+	r64  r65  r66  r67  r68  r69  r70  r71
+	r72  r73  r74  r75  r76  r77  r78  r79
+	r80  r81  r82  r83  r84  r85  r86  r87
+	r88  r89  r90  r91  r92  r93  r94  r95
+	r96  r97  r98  r99  r100 r101 r102 r103
+	r104 r105 r106 r107 r108 r109 r110 r111
+	r112 r113 r114 r115 r116 r117 r118 r119
+	r120 r121 r122 r123 r124 r125 r126 r127
+];
+
+define register offset=0 size=4 [
+	lr.x   lr.y   lr.z   lr.w   sp.x   sp.y   sp.z   sp.w
+	r2.x   r2.y   r2.z   r2.w   r3.x   r3.y   r3.z   r3.w
+	r4.x   r4.y   r4.z   r4.w   r5.x   r5.y   r5.z   r5.w
+	r6.x   r6.y   r6.z   r6.w   r7.x   r7.y   r7.z   r7.w
+	r8.x   r8.y   r8.z   r8.w   r9.x   r9.y   r9.z   r9.w
+	r10.x  r10.y  r10.z  r10.w  r11.x  r11.y  r11.z  r11.w
+	r12.x  r12.y  r12.z  r12.w  r13.x  r13.y  r13.z  r13.w
+	r14.x  r14.y  r14.z  r14.w  r15.x  r15.y  r15.z  r15.w
+	r16.x  r16.y  r16.z  r16.w  r17.x  r17.y  r17.z  r17.w
+	r18.x  r18.y  r18.z  r18.w  r19.x  r19.y  r19.z  r19.w
+	r20.x  r20.y  r20.z  r20.w  r21.x  r21.y  r21.z  r21.w
+	r22.x  r22.y  r22.z  r22.w  r23.x  r23.y  r23.z  r23.w
+	r24.x  r24.y  r24.z  r24.w  r25.x  r25.y  r25.z  r25.w
+	r26.x  r26.y  r26.z  r26.w  r27.x  r27.y  r27.z  r27.w
+	r28.x  r28.y  r28.z  r28.w  r29.x  r29.y  r29.z  r29.w
+	r30.x  r30.y  r30.z  r30.w  r31.x  r31.y  r31.z  r31.w
+	r32.x  r32.y  r32.z  r32.w  r33.x  r33.y  r33.z  r33.w
+	r34.x  r34.y  r34.z  r34.w  r35.x  r35.y  r35.z  r35.w
+	r36.x  r36.y  r36.z  r36.w  r37.x  r37.y  r37.z  r37.w
+	r38.x  r38.y  r38.z  r38.w  r39.x  r39.y  r39.z  r39.w
+	r40.x  r40.y  r40.z  r40.w  r41.x  r41.y  r41.z  r41.w
+	r42.x  r42.y  r42.z  r42.w  r43.x  r43.y  r43.z  r43.w
+	r44.x  r44.y  r44.z  r44.w  r45.x  r45.y  r45.z  r45.w
+	r46.x  r46.y  r46.z  r46.w  r47.x  r47.y  r47.z  r47.w
+	r48.x  r48.y  r48.z  r48.w  r49.x  r49.y  r49.z  r49.w
+	r50.x  r50.y  r50.z  r50.w  r51.x  r51.y  r51.z  r51.w
+	r52.x  r52.y  r52.z  r52.w  r53.x  r53.y  r53.z  r53.w
+	r54.x  r54.y  r54.z  r54.w  r55.x  r55.y  r55.z  r55.w
+	r56.x  r56.y  r56.z  r56.w  r57.x  r57.y  r57.z  r57.w
+	r58.x  r58.y  r58.z  r58.w  r59.x  r59.y  r59.z  r59.w
+	r60.x  r60.y  r60.z  r60.w  r61.x  r61.y  r61.z  r61.w
+	r62.x  r62.y  r62.z  r62.w  r63.x  r63.y  r63.z  r63.w
+	r64.x  r64.y  r64.z  r64.w  r65.x  r65.y  r65.z  r65.w
+	r66.x  r66.y  r66.z  r66.w  r67.x  r67.y  r67.z  r67.w
+	#r68.x  .y  .z  .w  r69.x  .y  .z  .w
+	#r70.x  .y  .z  .w  r71.x  .y  .z  .w
+	#r72.x  .y  .z  .w  r73.x  .y  .z  .w
+	#r74.x  .y  .z  .w  r75.x  .y  .z  .w
+	#r76.x  .y  .z  .w  r77.x  .y  .z  .w
+	#r78.x  .y  .z  .w  r79.x  .y  .z  .w
+	#r80.x  .y  .z  .w  r81.x  .y  .z  .w
+	#r82.x  .y  .z  .w  r83.x  .y  .z  .w
+	#r84.x  .y  .z  .w  r85.x  .y  .z  .w
+	#r86.x  .y  .z  .w  r87.x  .y  .z  .w
+	#r88.x  .y  .z  .w  r89.x  .y  .z  .w
+	#r90.x  .y  .z  .w  r91.x  .y  .z  .w
+	#r92.x  .y  .z  .w  r93.x  .y  .z  .w
+	#r94.x  .y  .z  .w  r95.x  .y  .z  .w
+	r96.x  r96.y  r96.z  r96.w  r97.x  r97.y  r97.z  r97.w
+	r98.x  r98.y  r98.z  r98.w  r99.x  r99.y  r99.z  r99.w
+	r100.x r100.y r100.z r100.w r101.x r101.y r101.z r101.w
+	r102.x r102.y r102.z r102.w r103.x r103.y r103.z r103.w
+	r104.x r104.y r104.z r104.w r105.x r105.y r105.z r105.w
+	r106.x r106.y r106.z r106.w r107.x r107.y r107.z r107.w
+	r108.x r108.y r108.z r108.w r109.x r109.y r109.z r109.w
+	r110.x r110.y r110.z r110.w r111.x r111.y r111.z r111.w
+	r112.x r112.y r112.z r112.w r113.x r113.y r113.z r113.w
+	r114.x r114.y r114.z r114.w r115.x r115.y r115.z r115.w
+	r116.x r116.y r116.z r116.w r117.x r117.y r117.z r117.w
+	r118.x r118.y r118.z r118.w r119.x r119.y r119.z r119.w
+	r120.x r120.y r120.z r120.w r121.x r121.y r121.z r121.w
+	r122.x r122.y r122.z r122.w r123.x r123.y r123.z r123.w
+	r124.x r124.y r124.z r124.w r125.x r125.y r125.z r125.w
+	r126.x r126.y r126.z r126.w r127.x r127.y r127.z r127.w
+];
+
+define register offset=0x1000 size=4 pc;
+define register offset=0x1004 size=4 srr0;
+
+define register offset=0x1008 size=16 [ rTmp1 ];
+
+define token instr(32)
+	RR_OP=(21,31)
+	RR_RB=(14,20)
+	RR_RA=(7,13)
+	RR_RT=(0,6)
+
+	CH_OP=(21,31)
+	CH_CA=(7,13)
+	CH_RT=(0,6)
+
+	RRR_OP=(28,31)
+	RRR_RT=(21,27)
+	RRR_RB=(14,20)
+	RRR_RA=(7,13)
+	RRR_RC=(0,6)
+
+	RI7_OP=(21,31)
+	RI7_I7=(14,19) signed
+	RI7_RA=(7,13)
+	RI7_RT=(0,6)
+
+	RI8_OP=(22,31)
+	RI8_I8=(14,21) signed
+	RI8_RA=(7,13)
+	RI8_RT=(0,6)
+
+	RI10_OP=(24,31)
+	RI10_I10=(14,23) signed
+	RI10_RA=(7,13)
+	RI10_RT=(0,6)
+
+	RI16_OP=(23,31)
+	RI16_I16=(7,22) signed
+	RI16_I16u=(7,22)
+	RI16_RT=(0,6)
+
+	HBR_OP=(21,31)
+	HBR_P=(20,20)
+	HBR_0=(16,19)
+	HBR_ROH=(14,15)
+	HBR_RA=(7,13)
+	HBR_ROL=(0,6)
+
+	HBRA_OP=(25,31)
+	HBRA_ROH=(23,24)
+	HBRA_I16=(7,22) signed
+	HBRA_ROL=(0,6)
+
+	HBRR_OP=(25,31)
+	HBRR_ROH=(23,24)
+	HBRR_I16=(7,22) signed
+	HBRR_ROL=(0,6)
+
+	RI18_OP=(25,31)
+	RI18_I18=(7,24) signed
+	RI18_I18u=(7,24)
+	RI18_RT=(0,6)
+
+	STOP_OP=(0,13)
+	SYNC_C=(21,22) #Workaround: 1-bit bitfield fails to compile
+;
+
+attach variables [
+	RR_RB RR_RA RR_RT
+	CH_RT
+	RRR_RT RRR_RB RRR_RA RRR_RC
+	RI7_RA RI7_RT
+	RI10_RA RI10_RT
+	RI16_RT
+	RI18_RT
+	HBR_RA
+]
+[
+	lr sp r2 r3 r4 r5 r6 r7
+	r8 r9 r10 r11 r12 r13 r14 r15
+	r16 r17 r18 r19 r20 r21 r22 r23
+	r24 r25 r26 r27 r28 r29 r30 r31
+	r32 r33 r34 r35 r36 r37 r38 r39
+	r40 r41 r42 r43 r44 r45 r46 r47
+	r48 r49 r50 r51 r52 r53 r54 r55
+	r56 r57 r58 r59 r60 r61 r62 r63
+	r64 r65 r66 r67 r68 r69 r70 r71
+	r72 r73 r74 r75 r76 r77 r78 r79
+	r80 r81 r82 r83 r84 r85 r86 r87 r88 r89
+	r90 r91 r92 r93 r94 r95 r96 r97 r98 r99
+	r100 r101 r102 r103 r104 r105 r106 r107 r108 r109
+	r110 r111 r112 r113 r114 r115 r116 r117 r118 r119
+	r120 r121 r122 r123 r124 r125 r126 r127
+];
+
+# we know that the LSA must be 16 bytes aligned but it seems that no &0xFFFFFFF0 is required
+LSA: symbol(RI10_RA)	is RI10_I10 & RI10_RA [ symbol = RI10_I10 << 4; ] { tmp = symbol:4 + RI10_RA(12); export tmp; }
+targetAddress: symbol	is RI16_I16 [ symbol = inst_start + (RI16_I16 << 2); ] { export *:4 symbol; }
+absoluteAddress: symbol	is RI16_I16 [ symbol = (RI16_I16 << 2); ] { export *:4 symbol; }
+LSAabsolute: symbol		is RI16_I16 [ symbol = (RI16_I16 << 2) & 0x3FFF0; ] { tmp:4 = symbol:4; export tmp; }
+#loadAddress: symbol	is RI18_I18 [ symbol = RI18_I18*1; ] { export *:8 symbol; }
+
+#
+## Memory Load/Store Instructions
+#
+
+# lqd rt,symbol(ra)
+:lqd RI10_RT,LSA is RI10_OP=52 & RI10_RT & LSA
+{
+	RI10_RT = *:16 LSA;
+}
+
+# lqx rt,ra,rb
+:lqx RR_RT,RR_RA,RR_RB is RR_OP=452 & RR_RT & RR_RA & RR_RB
+{
+	addr:4 = RR_RA(12) + RR_RB(12);
+	RR_RT = *:16 addr;
+}
+
+# lqa rt,symbol
+:lqa RI16_RT,LSAabsolute is RI16_OP=97 & RI16_RT & LSAabsolute
+{
+	RI16_RT = *:16 LSAabsolute;
+}
+
+# lqr rt,symbol
+:lqr RI16_RT,RI16_I16 is RI16_OP=103 & RI16_I16 & RI16_RT
+{
+	addr:4 = inst_start + (RI16_I16 << 2);
+	RI16_RT = *:16 addr;
+}
+
+# stqd rt,symbol(ra)
+:stqd RI10_RT,LSA is RI10_OP=36 & RI10_RT & LSA
+{
+	*:16 LSA = RI10_RT;
+}
+
+# stqx rt,ra,rb
+:stqx RR_RT,RR_RA,RR_RB is RR_OP=324 & RR_RB & RR_RA & RR_RT
+{
+	addr:4 = RR_RA(12) + RR_RB(12);
+	*:16 addr = RR_RT;
+}
+
+# stqa rt,symbol
+:stqa RI16_RT,LSAabsolute is RI16_OP=65 & LSAabsolute & RI16_RT
+{
+	*:16 LSAabsolute = RI16_RT;
+}
+
+# stqr rt,symbol
+:stqr RI16_RT,RI16_I16 is RI16_OP=71 & RI16_I16 & RI16_RT
+{
+	addr:4 = inst_start + (RI16_I16 << 2);
+	*:16 addr = RI16_RT;
+}
+
+define pcodeop insertind;
+
+# cbd rt,symbol(ra)
+:cbd RI7_RT,RI7_I7(RI7_RA) is RI7_OP=500 & RI7_I7 & RI7_RA & RI7_RT
+{
+	t:4 = (RI7_RA(12) + RI7_I7:4) & 0xF;
+	RI7_RT[0,8] = 0x1F;
+	RI7_RT[8,8] = 0x1E;
+	RI7_RT[16,8] = 0x1D;
+	RI7_RT[24,8] = 0x1C;
+	RI7_RT[32,8] = 0x1B;
+	RI7_RT[40,8] = 0x1A;
+	RI7_RT[48,8] = 0x19;
+	RI7_RT[56,8] = 0x18;
+	RI7_RT[64,8] = 0x17;
+	RI7_RT[72,8] = 0x16;
+	RI7_RT[80,8] = 0x15;
+	RI7_RT[88,8] = 0x14;
+	RI7_RT[96,8] = 0x13;
+	RI7_RT[104,8] = 0x12;
+	RI7_RT[112,8] = 0x11;
+	RI7_RT[120,8] = 0x10;
+	# Indices are swapped using the formula: 16 - sizeof(byte) - i = 16 - 1 - i = 15 - i
+	RI7_RT = insertind(RI7_RT,0x03:1,15 - t);
+}
+
+# cbx rt,ra,rb
+:cbx RR_RT,RR_RA,RR_RB is RR_OP=468 & RR_RB & RR_RA & RR_RT
+{
+	t:4 = (RR_RA(12) + RR_RB(12)) & 0xF;
+	RR_RT = zext(0:4);
+	i:4 = 0;
+	<loop>
+	if (i >= 16) goto <loop_end>;
+		RR_RT = insertind(RR_RT,i + 0x10,15 - i);
+		i = i + 1;
+		goto <loop>;
+	<loop_end>
+	# Indices are swapped using the formula: 16 - sizeof(byte) - i = 16 - 1 - i = 15 - i
+	RR_RT = insertind(RR_RT,0x03:1,15 - t);
+}
+
+# chd rt,symbol(ra)
+:chd RI7_RT,RI7_I7(RI7_RA) is RI7_OP=501 & RI7_I7 & RI7_RA & RI7_RT
+{
+	t:4 = (RI7_RA(12) + RI7_I7:4) & 0xE;
+	RI7_RT = zext(0:4);
+	i:4 = 0;
+	<loop>
+	if (i >= 16) goto <loop_end>;
+		RI7_RT = insertind(RI7_RT,i + 0x10,15 - i);
+		i = i + 1;
+		goto <loop>;
+	<loop_end>
+	# Indices are swapped using the formula: 16 - sizeof(halfword) - i = 16 - 2 - i = 14 - i
+	RI7_RT = insertind(RI7_RT,0x0203:2,14 - t);
+}
+
+# chx rt,ra,rb
+:chx RR_RT,RR_RA,RR_RB is RR_OP=469 & RR_RB & RR_RA & RR_RT
+{
+	t:4 = (RR_RA(12) + RR_RB(12)) & 0xE;
+	RR_RT = zext(0:4);
+	i:4 = 0;
+	<loop>
+	if (i >= 16) goto <loop_end>;
+		RR_RT = insertind(RR_RT,i + 0x10,15 - i);
+		i = i + 1;
+		goto <loop>;
+	<loop_end>
+	# Indices are swapped using the formula: 16 - sizeof(halfword) - i = 16 - 2 - i = 14 - i
+	RR_RT = insertind(RR_RT,0x0203:2,14 - t);
+}
+
+# cwd rt,symbol(ra)
+:cwd RI7_RT,RI7_I7(RI7_RA) is RI7_OP=502 & RI7_I7 & RI7_RA & RI7_RT
+{
+	t:4 = (RI7_RA(12) + RI7_I7:4) & 0xC;
+	RI7_RT[0,32] = 0x1C1D1E1F;
+	RI7_RT[32,32] = 0x18191A1B;
+	RI7_RT[64,32] = 0x14151617;
+	RI7_RT[96,32] = 0x10111213;
+	# Indices are swapped using the formula: 16 - sizeof(word) - i = 16 - 4 - i = 12 - i
+	RI7_RT = insertind(RI7_RT,0x00010203:4,12 - t);
+}
+
+# cwx rt,ra,rb
+:cwx RR_RT,RR_RA,RR_RB is RR_OP=470 & RR_RB & RR_RA & RR_RT
+{
+	t:4 = (RR_RA(12) + RR_RB(12)) & 0xC;
+	RR_RT = zext(0:4);
+	i:4 = 0;
+	<loop>
+	if (i >= 16) goto <loop_end>;
+		RR_RT = insertind(RR_RT,i + 0x10,15 - i);
+		i = i + 1;
+		goto <loop>;
+	<loop_end>
+	# Indices are swapped using the formula: 16 - sizeof(word) - i = 16 - 4 - i = 12 - i
+	RR_RT = insertind(RR_RT,0x00010203:4,12 - t);
+}
+
+# cdd rt,symbol(ra)
+:cdd RI7_RT,RI7_I7(RI7_RA) is RI7_OP=503 & RI7_I7 & RI7_RA & RI7_RT
+{
+	t:4 = (RI7_RA(12) + RI7_I7:4) & 0x8;
+	RI7_RT = zext(0:4);
+	i:4 = 0;
+	<loop>
+	if (i >= 16) goto <loop_end>;
+		RI7_RT = insertind(RI7_RT,i + 0x10,15 - i);
+		i = i + 1;
+		goto <loop>;
+	<loop_end>
+	# Indices are swapped using the formula: 16 - sizeof(doubleword) - i = 16 - 8 - i = 8 - i
+	RI7_RT = insertind(RI7_RT,0x0001020304050607:8,8 - t);
+}
+
+# cdx rt,ra,rb
+:cdx RR_RT,RR_RA,RR_RB is RR_OP=471 & RR_RB & RR_RA & RR_RT
+{
+	t:4 = (RR_RA(12) + RR_RB(12)) & 0x8;
+	RR_RT = zext(0:4);
+	i:4 = 0;
+	<loop>
+	if (i >= 16) goto <loop_end>;
+		RR_RT = insertind(RR_RT,i + 0x10,15 - i);
+		i = i + 1;
+		goto <loop>;
+	<loop_end>
+	# Indices are swapped using the formula: 16 - sizeof(doubleword) - i = 16 - 8 - i = 8 - i
+	RR_RT = insertind(RR_RT,0x0001020304050607:8,8 - t);
+}
+
+
+
+#
+## Constant-Formation Instructions
+#
+
+# ilh rt,symbol
+:ilh RI16_RT,RI16_I16 is RI16_OP=131 & RI16_I16 & RI16_RT
+{
+	s = RI16_I16:2;
+	RI16_RT[0,16] = s;
+	RI16_RT[16,16] = s;
+	RI16_RT[32,16] = s;
+	RI16_RT[48,16] = s;
+	RI16_RT[64,16] = s;
+	RI16_RT[80,16] = s;
+	RI16_RT[96,16] = s;
+	RI16_RT[112,16] = s;
+}
+
+# ilhu rt,symbol
+:ilhu RI16_RT,RI16_I16 is RI16_OP=130 & RI16_I16 & RI16_RT
+{
+	t = RI16_I16:4 << 16;
+	RI16_RT[0,32] = t;
+	RI16_RT[32,32] = t;
+	RI16_RT[64,32] = t;
+	RI16_RT[96,32] = t;
+}
+
+# il rt,symbol
+:il RI16_RT,RI16_I16 is RI16_OP=129 & RI16_I16 & RI16_RT
+{
+	t = RI16_I16:4;
+	RI16_RT[0,32] = t;
+	RI16_RT[32,32] = t;
+	RI16_RT[64,32] = t;
+	RI16_RT[96,32] = t;
+}
+
+# ila rt,symbol
+:ila RI18_RT,RI18_I18u is RI18_OP=33 & RI18_RT & RI18_I18u
+{
+	t = RI18_I18u:4;
+	RI18_RT[0,32] = t;
+	RI18_RT[32,32] = t;
+	RI18_RT[64,32] = t;
+	RI18_RT[96,32] = t;
+}
+
+# iohl rt,symbol
+:iohl RI16_RT,RI16_I16u is RI16_OP=193 & RI16_I16u & RI16_RT
+{
+	t = RI16_I16u:4;
+	RI16_RT[0,32] = RI16_RT[0,32] | t;
+	RI16_RT[32,32] = RI16_RT[32,32] | t;
+	RI16_RT[64,32] = RI16_RT[64,32] | t;
+	RI16_RT[96,32] = RI16_RT[96,32] | t;
+}
+
+# fsmbi rt,symbol
+:fsmbi RI16_RT,RI16_I16 is RI16_OP=101 & RI16_I16 & RI16_RT
+{
+	# using right shifts instead of left shifts because of big endianess
+	# (the sub indexes get inverted too relatively to addresses of array elements)
+	s = RI16_I16:2;
+	tmp = (s & 1) * 0xFF;
+	RI16_RT[0,8] = tmp:1;
+	tmp = (s >> 1 & 1) * 0xFF;
+	RI16_RT[8,8] = tmp:1;
+	tmp = (s >> 2 & 1) * 0xFF;
+	RI16_RT[16,8] = tmp:1;
+	tmp = (s >> 3 & 1) * 0xFF;
+	RI16_RT[24,8] = tmp:1;
+	tmp = (s >> 4 & 1) * 0xFF;
+	RI16_RT[32,8] = tmp:1;
+	tmp = (s >> 5 & 1) * 0xFF;
+	RI16_RT[40,8] = tmp:1;
+	tmp = (s >> 6 & 1) * 0xFF;
+	RI16_RT[48,8] = tmp:1;
+	tmp = (s >> 7 & 1) * 0xFF;
+	RI16_RT[56,8] = tmp:1;
+	tmp = (s >> 8 & 1) * 0xFF;
+	RI16_RT[64,8] = tmp:1;
+	tmp = (s >> 9 & 1) * 0xFF;
+	RI16_RT[72,8] = tmp:1;
+	tmp = (s >> 10 & 1) * 0xFF;
+	RI16_RT[80,8] = tmp:1;
+	tmp = (s >> 11 & 1) * 0xFF;
+	RI16_RT[88,8] = tmp:1;
+	tmp = (s >> 12 & 1) * 0xFF;
+	RI16_RT[96,8] = tmp:1;
+	tmp = (s >> 13 & 1) * 0xFF;
+	RI16_RT[104,8] = tmp:1;
+	tmp = (s >> 14 & 1) * 0xFF;
+	RI16_RT[112,8] = tmp:1;
+	tmp = (s >> 15 & 1) * 0xFF;
+	RI16_RT[120,8] = tmp:1;
+}
+
+
+
+#
+## Integer and Logical Instructions
+#
+
+# ah rt,ra,rb
+:ah RR_RT,RR_RA,RR_RB is RR_OP=200 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT[0,16] = RR_RA[0,16] + RR_RB[0,16];
+	RR_RT[16,16] = RR_RA[16,16] + RR_RB[16,16];
+	RR_RT[32,16] = RR_RA[32,16] + RR_RB[32,16];
+	RR_RT[48,16] = RR_RA[48,16] + RR_RB[48,16];
+	RR_RT[64,16] = RR_RA[64,16] + RR_RB[64,16];
+	RR_RT[80,16] = RR_RA[80,16] + RR_RB[80,16];
+	RR_RT[96,16] = RR_RA[96,16] + RR_RB[96,16];
+	RR_RT[112,16] = RR_RA[112,16] + RR_RB[112,16];
+}
+
+# ahi rt,ra,value
+:ahi RI10_RT,RI10_RA,RI10_I10 is RI10_OP=29 & RI10_RT & RI10_RA & RI10_I10
+{
+	s = RI10_I10:2;
+	RI10_RT[0,16] = RI10_RA[0,16] + s;
+	RI10_RT[16,16] = RI10_RA[16,16] + s;
+	RI10_RT[32,16] = RI10_RA[32,16] + s;
+	RI10_RT[48,16] = RI10_RA[48,16] + s;
+	RI10_RT[64,16] = RI10_RA[64,16] + s;
+	RI10_RT[80,16] = RI10_RA[80,16] + s;
+	RI10_RT[96,16] = RI10_RA[96,16] + s;
+	RI10_RT[112,16] = RI10_RA[112,16] + s;
+}
+
+# a rt,ra,rb
+:a RR_RT,RR_RA,RR_RB is RR_OP=192 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT[0,32] = RR_RA[0,32] + RR_RB[0,32];
+	RR_RT[32,32] = RR_RA[32,32] + RR_RB[32,32];
+	RR_RT[64,32] = RR_RA[64,32] + RR_RB[64,32];
+	RR_RT[96,32] = RR_RA[96,32] + RR_RB[96,32];
+}
+
+# ai rt,ra,value
+:ai RI10_RT,RI10_RA,RI10_I10 is RI10_OP=28 & RI10_RT & RI10_RA & RI10_I10
+{
+	t = RI10_I10:4;
+	RI10_RT[0,32] = RI10_RA[0,32] + t;
+	RI10_RT[32,32] = RI10_RA[32,32] + t;
+	RI10_RT[64,32] = RI10_RA[64,32] + t;
+	RI10_RT[96,32] = RI10_RA[96,32] + t;
+}
+
+# sfh rt,ra,rb
+:sfh RR_RT,RR_RA,RR_RB is RR_OP=72 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT[0,16] = RR_RB[0,16] - RR_RA[0,16];
+	RR_RT[16,16] = RR_RB[16,16] - RR_RA[16,16];
+	RR_RT[32,16] = RR_RB[32,16] - RR_RA[32,16];
+	RR_RT[48,16] = RR_RB[48,16] - RR_RA[48,16];
+	RR_RT[64,16] = RR_RB[64,16] - RR_RA[64,16];
+	RR_RT[80,16] = RR_RB[80,16] - RR_RA[80,16];
+	RR_RT[96,16] = RR_RB[96,16] - RR_RA[96,16];
+	RR_RT[112,16] = RR_RB[112,16] - RR_RA[112,16];
+}
+
+# sfhi rt,ra,value
+:sfhi RI10_RT,RI10_RA,RI10_I10 is RI10_OP=13 & RI10_RT & RI10_RA & RI10_I10
+{
+	t = RI10_I10:2;
+	RI10_RT[0,16] = t - RI10_RA[0,16];
+	RI10_RT[16,16] = t - RI10_RA[16,16];
+	RI10_RT[32,16] = t - RI10_RA[32,16];
+	RI10_RT[48,16] = t - RI10_RA[48,16];
+	RI10_RT[64,16] = t - RI10_RA[64,16];
+	RI10_RT[80,16] = t - RI10_RA[80,16];
+	RI10_RT[96,16] = t - RI10_RA[96,16];
+	RI10_RT[112,16] = t - RI10_RA[112,16];
+}
+
+# sf rt,ra,rb
+:sf RR_RT,RR_RA,RR_RB is RR_OP=64 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT[0,32] = RR_RB[0,32] - RR_RA[0,32];
+	RR_RT[32,32] = RR_RB[32,32] - RR_RA[32,32];
+	RR_RT[64,32] = RR_RB[64,32] - RR_RA[64,32];
+	RR_RT[96,32] = RR_RB[96,32] - RR_RA[96,32];
+}
+
+# sfi rt,ra,value
+:sfi RI10_RT,RI10_RA,RI10_I10 is RI10_OP=12 & RI10_RT & RI10_RA & RI10_I10
+{
+	t = RI10_I10:4;
+	RI10_RT[0,32] = t - RI10_RA[0,32];
+	RI10_RT[32,32] = t - RI10_RA[32,32];
+	RI10_RT[64,32] = t - RI10_RA[64,32];
+	RI10_RT[96,32] = t - RI10_RA[96,32];
+}
+
+# addx rt,ra,rb
+:addx RR_RT,RR_RA,RR_RB is RR_OP=832 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT[0,32] = RR_RA[0,32] + RR_RB[0,32] + (RR_RT[0,32] & 1);
+	RR_RT[32,32] = RR_RA[32,32] + RR_RB[32,32] + (RR_RT[32,32] & 1);
+	RR_RT[64,32] = RR_RA[64,32] + RR_RB[64,32] + (RR_RT[64,32] & 1);
+	RR_RT[96,32] = RR_RA[96,32] + RR_RB[96,32] + (RR_RT[96,32] & 1);
+}
+
+# cg rt,ra,rb
+:cg RR_RT,RR_RA,RR_RB is RR_OP=194 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT[0,32] = zext(carry(RR_RA[0,32], RR_RB[0,32]));
+	RR_RT[32,32] = zext(carry(RR_RA[32,32], RR_RB[32,32]));
+	RR_RT[64,32] = zext(carry(RR_RA[64,32], RR_RB[64,32]));
+	RR_RT[96,32] = zext(carry(RR_RA[96,32], RR_RB[96,32]));
+}
+
+# cgx rt,ra,rb
+:cgx RR_RT,RR_RA,RR_RB is RR_OP=834 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT[0,32] = zext(carry(RR_RA[0,32], RR_RB[0,32]) || carry(RR_RA[0,32] + RR_RB[0,32], RR_RT[0,32] & 1));
+	RR_RT[32,32] = zext(carry(RR_RA[32,32], RR_RB[32,32]) || carry(RR_RA[32,32] + RR_RB[32,32], RR_RT[32,32] & 1));
+	RR_RT[64,32] = zext(carry(RR_RA[64,32], RR_RB[64,32]) || carry(RR_RA[64,32] + RR_RB[64,32], RR_RT[64,32] & 1));
+	RR_RT[96,32] = zext(carry(RR_RA[96,32], RR_RB[96,32]) || carry(RR_RA[96,32] + RR_RB[96,32], RR_RT[96,32] & 1));
+}
+
+# sfx rt,ra,rb
+:sfx RR_RT,RR_RA,RR_RB is RR_OP=833 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT[0,32] = RR_RB[0,32] - RR_RA[0,32] + (RR_RT[0,32] & 1);
+	RR_RT[32,32] = RR_RB[32,32] - RR_RA[32,32] + (RR_RT[32,32] & 1);
+	RR_RT[64,32] = RR_RB[64,32] - RR_RA[64,32] + (RR_RT[64,32] & 1);
+	RR_RT[96,32] = RR_RB[96,32] - RR_RA[96,32] + (RR_RT[96,32] & 1);
+}
+
+# bg rt,ra,rb
+:bg RR_RT,RR_RA,RR_RB is RR_OP=66 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT[0,32] = zext(RR_RB[0,32] >= RR_RA[0,32]);
+	RR_RT[32,32] = zext(RR_RB[32,32] >= RR_RA[32,32]);
+	RR_RT[64,32] = zext(RR_RB[64,32] >= RR_RA[64,32]);
+	RR_RT[96,32] = zext(RR_RB[96,32] >= RR_RA[96,32]);
+}
+
+# bgx rt,ra,rb
+:bgx RR_RT,RR_RA,RR_RB is RR_OP=835 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT[0,32] = zext((RR_RB[0,32] > RR_RA[0,32]) || ((RR_RT[0,32] & 1) != 0) && (RR_RB[0,32] == RR_RA[0,32]));
+	RR_RT[32,32] = zext((RR_RB[32,32] > RR_RA[32,32]) || ((RR_RT[32,32] & 1) != 0) && (RR_RB[32,32] == RR_RA[32,32]));
+	RR_RT[64,32] = zext((RR_RB[64,32] > RR_RA[64,32]) || ((RR_RT[64,32] & 1) != 0) && (RR_RB[64,32] == RR_RA[64,32]));
+	RR_RT[96,32] = zext((RR_RB[96,32] > RR_RA[96,32]) || ((RR_RT[96,32] & 1) != 0) && (RR_RB[96,32] == RR_RA[96,32]));
+}
+
+# mpy rt,ra,rb
+:mpy RR_RT,RR_RA,RR_RB is RR_OP=964 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT[0,32] = ((RR_RA[0,32] << 16) s>> 16) * ((RR_RB[0,32] << 16) s>> 16);
+	RR_RT[32,32] = ((RR_RA[32,32] << 16) s>> 16) * ((RR_RB[32,32] << 16) s>> 16);
+	RR_RT[64,32] = ((RR_RA[64,32] << 16) s>> 16) * ((RR_RB[64,32] << 16) s>> 16);
+	RR_RT[96,32] = ((RR_RA[96,32] << 16) s>> 16) * ((RR_RB[96,32] << 16) s>> 16);
+}
+
+# mpyu rt,ra,rb
+:mpyu RR_RT,RR_RA,RR_RB is RR_OP=972 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT[0,32] = (RR_RA[0,32] & 0xFFFF) * (RR_RB[0,32] & 0xFFFF);
+	RR_RT[32,32] = (RR_RA[32,32] & 0xFFFF) * (RR_RB[32,32] & 0xFFFF);
+	RR_RT[64,32] = (RR_RA[64,32] & 0xFFFF) * (RR_RB[64,32] & 0xFFFF);
+	RR_RT[96,32] = (RR_RA[96,32] & 0xFFFF) * (RR_RB[96,32] & 0xFFFF);
+}
+
+# mpyi rt,ra,value
+:mpyi RI10_RT,RI10_RA,RI10_I10 is RI10_OP=116 & RI10_RT & RI10_RA & RI10_I10
+{
+	t = RI10_I10:4;
+	RI10_RT[0,32] = ((RI10_RA[0,32] << 16) s>> 16) * t;
+	RI10_RT[32,32] = ((RI10_RA[32,32] << 16) s>> 16) * t;
+	RI10_RT[64,32] = ((RI10_RA[64,32] << 16) s>> 16) * t;
+	RI10_RT[96,32] = ((RI10_RA[96,32] << 16) s>> 16) * t;
+}
+
+# mpyui rt,ra,value
+:mpyui RI10_RT,RI10_RA,RI10_I10 is RI10_OP=117 & RI10_RT & RI10_RA & RI10_I10
+{
+	t = (RI10_I10:4) & 0xFFFF;
+	RI10_RT[0,32] = (RI10_RA[0,32] & 0xFFFF) * t;
+	RI10_RT[32,32] = (RI10_RA[32,32] & 0xFFFF) * t;
+	RI10_RT[64,32] = (RI10_RA[64,32] & 0xFFFF) * t;
+	RI10_RT[96,32] = (RI10_RA[96,32] & 0xFFFF) * t;
+}
+
+# mpya rt,ra,rb,rc
+:mpya RRR_RT,RRR_RA,RRR_RB,RRR_RC is RRR_OP=12 & RRR_RT & RRR_RB & RRR_RA & RRR_RC
+{
+	RRR_RT[0,32] = ((RRR_RA[0,32] << 16) s>> 16) * ((RRR_RB[0,32] << 16) s>> 16) + RRR_RC[0,32];
+	RRR_RT[32,32] = ((RRR_RA[32,32] << 16) s>> 16) * ((RRR_RB[32,32] << 16) s>> 16) + RRR_RC[32,32];
+	RRR_RT[64,32] = ((RRR_RA[64,32] << 16) s>> 16) * ((RRR_RB[64,32] << 16) s>> 16) + RRR_RC[64,32];
+	RRR_RT[96,32] = ((RRR_RA[96,32] << 16) s>> 16) * ((RRR_RB[96,32] << 16) s>> 16) + RRR_RC[96,32];
+}
+
+# mpyh rt,ra,rb
+:mpyh RR_RT,RR_RA,RR_RB is RR_OP=965 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT[0,32] = ((RR_RA[0,32] >> 16) * (RR_RB[0,32] & 0xFFFF)) << 16;
+	RR_RT[32,32] = ((RR_RA[32,32] >> 16) * (RR_RB[32,32] & 0xFFFF)) << 16;
+	RR_RT[64,32] = ((RR_RA[64,32] >> 16) * (RR_RB[64,32] & 0xFFFF)) << 16;
+	RR_RT[96,32] = ((RR_RA[96,32] >> 16) * (RR_RB[96,32] & 0xFFFF)) << 16;
+}
+
+# mpys rt,ra,rb
+:mpys RR_RT,RR_RA,RR_RB is RR_OP=967 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT[0,32] = (((RR_RA[0,32] << 16) s>> 16) * ((RR_RB[0,32] << 16) s>> 16)) s>> 16;
+	RR_RT[32,32] = (((RR_RA[32,32] << 16) s>> 16) * ((RR_RB[32,32] << 16) s>> 16)) s>> 16;
+	RR_RT[64,32] = (((RR_RA[64,32] << 16) s>> 16) * ((RR_RB[64,32] << 16) s>> 16)) s>> 16;
+	RR_RT[96,32] = (((RR_RA[96,32] << 16) s>> 16) * ((RR_RB[96,32] << 16) s>> 16)) s>> 16;
+}
+
+define pcodeop __spu_mpyhh;
+
+# mpyhh rt,ra,rb
+:mpyhh RR_RT,RR_RA,RR_RB is RR_OP=966 & RR_RT & RR_RA & RR_RB
+{
+	#RR_RT = __spu_mpyhh(RR_RA, RR_RB);
+	RR_RT = __spu_mpyhh(RR_RA, RR_RB);
+}
+
+define pcodeop __spu_mpyhha;
+
+# mpyhha rt,ra,rb
+:mpyhha RR_RT,RR_RA,RR_RB is RR_OP=838 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT = __spu_mpyhha(RR_RA, RR_RB);
+}
+
+define pcodeop __spu_mpyhhu;
+
+# mpyhhu rt,ra,rb
+:mpyhhu RR_RT,RR_RA,RR_RB is RR_OP=974 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT = __spu_mpyhhu(RR_RA, RR_RB);
+}
+
+define pcodeop __spu_mpyhhau;
+
+# mpyhhau rt,ra,rb
+:mpyhhau RR_RT,RR_RA,RR_RB is RR_OP=846 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT = __spu_mpyhhau(RR_RA, RR_RB);
+}
+
+define pcodeop __spu_clz;
+
+# clz rt,ra
+:clz RI7_RT,RI7_RA is RI7_OP=677 & RI7_I7=0 & RI7_RA & RI7_RT
+{
+	RI7_RT = __spu_clz(RI7_RA);
+}
+
+# cntb rt,ra
+:cntb RI7_RT,RI7_RA is RI7_OP=692 & RI7_I7=0 & RI7_RA & RI7_RT
+{
+	RI7_RT[0,8] = popcount(RI7_RA[0,8]);
+	RI7_RT[8,8] = popcount(RI7_RA[8,8]);
+	RI7_RT[16,8] = popcount(RI7_RA[16,8]);
+	RI7_RT[24,8] = popcount(RI7_RA[24,8]);
+	RI7_RT[32,8] = popcount(RI7_RA[32,8]);
+	RI7_RT[40,8] = popcount(RI7_RA[40,8]);
+	RI7_RT[48,8] = popcount(RI7_RA[48,8]);
+	RI7_RT[56,8] = popcount(RI7_RA[56,8]);
+	RI7_RT[64,8] = popcount(RI7_RA[64,8]);
+	RI7_RT[72,8] = popcount(RI7_RA[72,8]);
+	RI7_RT[80,8] = popcount(RI7_RA[80,8]);
+	RI7_RT[88,8] = popcount(RI7_RA[88,8]);
+	RI7_RT[96,8] = popcount(RI7_RA[96,8]);
+	RI7_RT[104,8] = popcount(RI7_RA[104,8]);
+	RI7_RT[112,8] = popcount(RI7_RA[112,8]);
+	RI7_RT[120,8] = popcount(RI7_RA[120,8]);
+}
+
+define pcodeop __spu_fsmb;
+
+# fsmb rt,ra
+:fsmb RI7_RT,RI7_RA is RI7_OP=438 & RI7_I7=0 & RI7_RA & RI7_RT
+{
+	RI7_RT = __spu_fsmb(RI7_RA);
+}
+
+define pcodeop __spu_fsmh;
+
+# fsmh rt,ra
+:fsmh RI7_RT,RI7_RA is RI7_OP=437 & RI7_I7=0 & RI7_RA & RI7_RT
+{
+	RI7_RT = __spu_fsmh(RI7_RA);
+}
+
+# fsm rt,ra
+:fsm RI7_RT,RI7_RA is RI7_OP=436 & RI7_I7=0 & RI7_RA & RI7_RT
+{
+	mask = RI7_RA[96,8];
+
+	m1 = mask & 1;
+	RI7_RT[0,32] = zext(m1) * 0xFFFFFFFF;
+	m2 = mask >> 1 & 1;
+	RI7_RT[32,32] = zext(m2) * 0xFFFFFFFF;
+	m3 = mask >> 2 & 1;
+	RI7_RT[64,32] = zext(m3) * 0xFFFFFFFF;
+	m4 = mask >> 3 & 1;
+	RI7_RT[96,32] = zext(m4) * 0xFFFFFFFF;
+}
+
+define pcodeop __spu_gbb;
+
+# gbb rt,ra
+:gbb RI7_RT,RI7_RA is RI7_OP=434 & RI7_I7=0 & RI7_RA & RI7_RT
+{
+	RI7_RT = __spu_gbb(RI7_RA);
+}
+
+define pcodeop __spu_gbh;
+
+# gbh rt,ra
+:gbh RI7_RT,RI7_RA is RI7_OP=433 & RI7_I7=0 & RI7_RA & RI7_RT
+{
+	RI7_RT = __spu_gbh(RI7_RA);
+}
+
+define pcodeop __spu_gb;
+
+# gb rt,ra
+:gb RI7_RT,RI7_RA is RI7_OP=432 & RI7_I7=0 & RI7_RA & RI7_RT
+{
+	RI7_RT = __spu_gb(RI7_RA);
+}
+
+define pcodeop __spu_avgb;
+
+# avgb rt,ra,rb
+:avgb RR_RT,RR_RA,RR_RB is RR_OP=211 & RR_RB & RR_RA & RR_RT
+{
+	RR_RT = __spu_avgb(RR_RA, RR_RB);
+}
+
+define pcodeop __spu_absdb;
+
+# absdb rt,ra,rb
+:absdb RR_RT,RR_RA,RR_RB is RR_OP=83 & RR_RB & RR_RA & RR_RT
+{
+	RR_RT = __spu_absdb(RR_RA, RR_RB);
+}
+
+define pcodeop __spu_sumb;
+
+# sumb rt,ra,rb
+:sumb RR_RT,RR_RA,RR_RB is RR_OP=595 & RR_RB & RR_RA & RR_RT
+{
+	RR_RT = __spu_sumb(RR_RA, RR_RB);
+}
+
+# xsbh rt,ra
+:xsbh RR_RT,RR_RA is RR_OP=694 & RR_RB=0 & RR_RA & RR_RT
+{
+	RR_RT[0,16] = sext(RR_RA[0,8]);
+	RR_RT[16,16] = sext(RR_RA[16,8]);
+	RR_RT[32,16] = sext(RR_RA[32,8]);
+	RR_RT[48,16] = sext(RR_RA[48,8]);
+	RR_RT[64,16] = sext(RR_RA[64,8]);
+	RR_RT[80,16] = sext(RR_RA[80,8]);
+	RR_RT[96,16] = sext(RR_RA[96,8]);
+	RR_RT[112,16] = sext(RR_RA[112,8]);
+}
+
+# xshw rt,ra
+:xshw RR_RT,RR_RA is RR_OP=686 & RR_RB=0 & RR_RA & RR_RT
+{
+	RR_RT[0,32] = sext(RR_RA[0,16]);
+	RR_RT[32,32] = sext(RR_RA[32,16]);
+	RR_RT[64,32] = sext(RR_RA[64,16]);
+	RR_RT[96,32] = sext(RR_RA[96,16]);
+}
+
+# xswd rt,ra
+:xswd RR_RT,RR_RA is RR_OP=678 & RR_RB=0 & RR_RA & RR_RT
+{
+	RR_RT[0,64] = sext(RR_RA[0,32]);
+	RR_RT[64,64] = sext(RR_RA[64,32]);
+}
+
+# and rt,ra,rb
+:and RR_RT,RR_RA,RR_RB is RR_OP=193 & RR_RB & RR_RA & RR_RT
+{
+	RR_RT[0,32] = RR_RA[0,32] & RR_RB[0,32];
+	RR_RT[32,32] = RR_RA[32,32] & RR_RB[32,32];
+	RR_RT[64,32] = RR_RA[64,32] & RR_RB[64,32];
+	RR_RT[96,32] = RR_RA[96,32] & RR_RB[96,32];
+}
+
+# andc rt,ra,rb
+:andc RR_RT,RR_RA,RR_RB is RR_OP=705 & RR_RB & RR_RA & RR_RT
+{
+	RR_RT[0,32] = RR_RA[0,32] & (~RR_RB[0,32]);
+	RR_RT[32,32] = RR_RA[32,32] & (~RR_RB[32,32]);
+	RR_RT[64,32] = RR_RA[64,32] & (~RR_RB[64,32]);
+	RR_RT[96,32] = RR_RA[96,32] & (~RR_RB[96,32]);
+}
+
+# andbi rt,ra,value
+:andbi RI10_RT,RI10_RA,RI10_I10 is RI10_OP=22 & RI10_RT & RI10_RA & RI10_I10
+{
+	b = RI10_I10:1;
+	bbbb:4 = zext(b);
+	bbbb = bbbb << 8 | bbbb;
+	bbbb = bbbb << 16 | bbbb;
+	RI10_RT[0,32] = RI10_RA[0,32] & bbbb;
+	RI10_RT[32,32] = RI10_RA[32,32] & bbbb;
+	RI10_RT[64,32] = RI10_RA[64,32] & bbbb;
+	RI10_RT[96,32] = RI10_RA[96,32] & bbbb;
+}
+
+# andhi rt,ra,value
+:andhi RI10_RT,RI10_RA,RI10_I10 is RI10_OP=21 & RI10_RT & RI10_RA & RI10_I10
+{
+	t = RI10_I10:2;
+	RI10_RT = RI10_RA & RI10_I10;
+}
+
+# andi rt,ra,value
+:andi RI10_RT,RI10_RA,RI10_I10 is RI10_OP=20 & RI10_RT & RI10_RA & RI10_I10
+{
+	t = RI10_I10:4;
+	RI10_RT[0,32] = RI10_RA[0,32] & t;
+	RI10_RT[32,32] = RI10_RA[32,32] & t;
+	RI10_RT[64,32] = RI10_RA[64,32] & t;
+	RI10_RT[96,32] = RI10_RA[96,32] & t;
+}
+
+# or rt,ra,rb
+:or RR_RT,RR_RA,RR_RB is RR_OP=65 & RR_RB & RR_RA & RR_RT
+{
+	RR_RT = RR_RA | RR_RB;
+}
+
+# orc rt,ra,rb
+:orc RR_RT,RR_RA,RR_RB is RR_OP=713 & RR_RB & RR_RA & RR_RT
+{
+	RR_RT = RR_RA | (~RR_RB);
+}
+
+# orbi rt,ra,value
+:orbi RI10_RT,RI10_RA,RI10_I10 is RI10_OP=6 & RI10_RT & RI10_RA & RI10_I10
+{
+	b = RI10_I10:1;
+	bbbb:4 = zext(b);
+	bbbb = bbbb << 8 | bbbb;
+	bbbb = bbbb << 16 | bbbb;
+	RI10_RT[0,32] = RI10_RA[0,32] | bbbb;
+	RI10_RT[32,32] = RI10_RA[32,32] | bbbb;
+	RI10_RT[64,32] = RI10_RA[64,32] | bbbb;
+	RI10_RT[96,32] = RI10_RA[96,32] | bbbb;
+}
+
+# orhi rt,ra,value
+:orhi RI10_RT,RI10_RA,RI10_I10 is RI10_OP=5 & RI10_RT & RI10_RA & RI10_I10
+{
+	RI10_RT = (RI10_RA | RI10_I10) & 0xFFFF;
+}
+
+# lr rt,ra
+:lr RI10_RT,RI10_RA is RI10_OP=4 & RI10_RT & RI10_RA & RI10_I10=0
+{
+	RI10_RT = RI10_RA;
+}
+
+# ori rt,ra,value
+:ori RI10_RT,RI10_RA,RI10_I10 is RI10_OP=4 & RI10_RT & RI10_RA & RI10_I10
+{
+	RI10_RT = RI10_RA | RI10_I10;
+}
+
+# orx rt,ra
+:orx RR_RT,RR_RA is RR_OP=496 & RR_RB=0 & RR_RA & RR_RT
+{
+	RR_RT = (RR_RA | (RR_RA >> 32) | (RR_RA >> 64) | (RR_RA >> 96)) & 0xFFFFFFFF;
+}
+
+# xor rt,ra,rb
+:xor RR_RT,RR_RA,RR_RB is RR_OP=577 & RR_RB & RR_RA & RR_RT
+{
+	RR_RT = RR_RA ^ RR_RB;
+}
+
+# xorbi rt,ra,value
+:xorbi RI10_RT,RI10_RA,RI10_I10 is RI10_OP=70 & RI10_RT & RI10_RA & RI10_I10
+{
+	RI10_RT = (RI10_RA ^ RI10_I10) & 0xFF;
+}
+
+# xorhi rt,ra,value
+:xorhi RI10_RT,RI10_RA,RI10_I10 is RI10_OP=69 & RI10_RT & RI10_RA & RI10_I10
+{
+	RI10_RT = (RI10_RA ^ RI10_I10) & 0xFFFF;
+}
+
+# xori rt,ra,value
+:xori RI10_RT,RI10_RA,RI10_I10 is RI10_OP=68 & RI10_RT & RI10_RA & RI10_I10
+{
+	RI10_RT = (RI10_RA ^ RI10_I10) & 0xFFFFFFFF;
+}
+
+# nand rt,ra,rb
+:nand RR_RT,RR_RA,RR_RB is RR_OP=201 & RR_RB & RR_RA & RR_RT
+{
+	RR_RT = ~(RR_RA & RR_RB);
+}
+
+# nor rt,ra,rb
+:nor RR_RT,RR_RA,RR_RB is RR_OP=73 & RR_RB & RR_RA & RR_RT
+{
+	RR_RT = ~(RR_RA | RR_RB);
+}
+
+# eqv rt,ra,rb
+:eqv RR_RT,RR_RA,RR_RB is RR_OP=585 & RR_RB & RR_RA & RR_RT
+{
+	RR_RT = RR_RA ^ (~RR_RB);
+}
+
+# selb rt,ra,rb,rc
+:selb RRR_RT,RRR_RA,RRR_RB,RRR_RC is RRR_OP=8 & RRR_RT & RRR_RB & RRR_RA & RRR_RC
+{
+	RRR_RT[0,32] = (RRR_RC[0,32] & RRR_RB[0,32]) | ((~RRR_RC[0,32]) & RRR_RA[0,32]);
+	RRR_RT[32,32] = (RRR_RC[32,32] & RRR_RB[32,32]) | ((~RRR_RC[32,32]) & RRR_RA[32,32]);
+	RRR_RT[64,32] = (RRR_RC[64,32] & RRR_RB[64,32]) | ((~RRR_RC[64,32]) & RRR_RA[64,32]);
+	RRR_RT[96,32] = (RRR_RC[96,32] & RRR_RB[96,32]) | ((~RRR_RC[96,32]) & RRR_RA[96,32]);
+}
+
+define pcodeop extractind;
+
+# shufb rt,ra,rb,rc
+:shufb RRR_RT,RRR_RA,RRR_RB,RRR_RC is RRR_OP=11 & RRR_RT & RRR_RB & RRR_RA & RRR_RC
+{
+	rTmp1 = zext(0:4);
+	i:4 = 0;
+	<loop>
+	if (i >= 16) goto <loop_end>;
+		# Indices are swapped using the formula: 16 - sizeof(byte) - i = 16 - 1 - i = 15 - i
+		b:1 = extractind(RRR_RC,15 - i);
+		c:1 = 0;# Must initialize to 0 (will be 0x00 actually) to avoid error and unaff
+		if ((b >> 7 & 1) == 0) goto <skipconsts>;
+			if ((b >> 6 & 1) == 0) goto <skipvars>; # Already assigned c to 0x00
+				if ((b >> 5 & 1) == 0) goto <skip_0x80>;
+					c = 0x80;
+					goto <skipvars>;
+				<skip_0x80>
+					c = 0xFF;
+					goto <skipvars>;
+		<skipconsts>
+		d = b & 0xF;
+		if ((b >> 4 & 1) != 0) goto <skipfirst>;
+			c = extractind(RRR_RA,15 - d);
+			goto <skipsecond>;
+		<skipfirst>
+			c = extractind(RRR_RB,15 - d);
+		<skipsecond>
+		<skipvars>
+		rTmp1 = insertind(rTmp1,c,15 - i);
+		i = i + 1;
+		goto <loop>;
+	<loop_end>
+	RRR_RT = rTmp1;
+}
+
+
+
+#
+## Shift and Rotate Instructions
+#
+
+define pcodeop __spu_shlh;
+
+# shlh rt,ra,rb
+:shlh RR_RT,RR_RA,RR_RB is RR_OP=95 & RR_RB & RR_RA & RR_RT
+{
+	shift_count = RR_RB % 32;
+	if (shift_count > 15) goto <zero_out>;
+	RR_RT = RR_RA << shift_count;
+	goto inst_next;
+	<zero_out>
+	RR_RT = 0;
+}
+
+# shlhi rt,ra,value
+:shlhi RI7_RT,RI7_RA,RI7_I7 is RI7_OP=127 & RI7_RT & RI7_RA & RI7_I7
+{
+	shift_count = RI7_I7 % 32;
+	if (shift_count == 0) goto <copy>;
+	if (shift_count > 15) goto <zero_out>;
+	RI7_RT = RI7_RA << shift_count;
+	goto inst_next;
+	<zero_out>
+	RI7_RT = 0;
+	goto inst_next;
+	<copy>
+	RI7_RT = RI7_RA;
+}
+
+# shl rt,ra,rb
+:shl RR_RT,RR_RA,RR_RB is RR_OP=91 & RR_RB & RR_RA & RR_RT
+{
+	shift_count = RR_RB % 64;
+	if (shift_count > 31) goto <zero_out>;
+	RR_RT = RR_RA << shift_count;
+	goto inst_next;
+	<zero_out>
+	RR_RT = 0;
+}
+
+# shli rt,ra,value
+:shli RI7_RT,RI7_RA,RI7_I7 is RI7_OP=123 & RI7_RT & RI7_RA & RI7_I7
+{
+	s = RI7_I7 % 64;
+	i:4 = 0;
+	if (s == 0) goto <copy>;
+	if (s > 31) goto <zero_out>;
+	RI7_RT = RI7_RA << s;
+	goto inst_next;
+	<zero_out>
+	RI7_RT = 0;
+	goto inst_next;
+	<copy>
+	RI7_RT = RI7_RA;
+}
+
+define pcodeop __spu_shlqbi;
+
+# shlqbi rt,ra,rb
+:shlqbi RR_RT,RR_RA,RR_RB is RR_OP=475 & RR_RB & RR_RA & RR_RT
+{
+	RR_RT = __spu_shlqbi(RR_RA, RR_RB);
+}
+
+define pcodeop __spu_shlqbii;
+
+# shlqbii rt,ra,value
+:shlqbii RI7_RT,RI7_RA,RI7_I7 is RI7_OP=507 & RI7_RT & RI7_RA & RI7_I7
+{
+	RI7_RT = __spu_shlqbii(RI7_RA, RI7_I7:4);
+}
+
+define pcodeop __spu_shlqby;
+
+# shlqby rt,ra,rb
+:shlqby RR_RT,RR_RA,RR_RB is RR_OP=479 & RR_RB & RR_RA & RR_RT
+{
+	RR_RT = __spu_shlqby(RR_RA, RR_RB);
+}
+
+#lr rt,ra
+:lr RI7_RT,RI7_RA is RI7_OP=511 & RI7_RT & RI7_RA & RI7_I7=0
+{
+	RI7_RT = RI7_RA;
+}
+
+define pcodeop __spu_shlqbyi;
+
+# shlqbyi rt,ra,value
+:shlqbyi RI7_RT,RI7_RA,RI7_I7 is RI7_OP=511 & RI7_RT & RI7_RA & RI7_I7
+{
+	RI7_RT = __spu_shlqbyi(RI7_RA, RI7_I7:4);
+}
+
+define pcodeop __spu_shlqbybi;
+
+# shlqbybi rt,ra,rb
+:shlqbybi RR_RT,RR_RA,RR_RB is RR_OP=463 & RR_RB & RR_RA & RR_RT
+{
+	RR_RT = __spu_shlqbybi(RR_RA, RR_RB);
+}
+
+define pcodeop __spu_roth;
+
+# roth rt,ra,rb
+:roth RR_RT,RR_RA,RR_RB is RR_OP=92 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT = __spu_roth(RR_RA, RR_RB);
+}
+
+define pcodeop __spu_rothi;
+
+# rothi rt,ra,value
+:rothi RI7_RT,RI7_RA,RI7_I7 is RI7_OP=124 & RI7_RT & RI7_RA & RI7_I7
+{
+	RI7_RT = __spu_rothi(RI7_RA, RI7_I7:4);
+}
+
+define pcodeop __spu_rot;
+
+# rot rt,ra,rb
+:rot RR_RT,RR_RA,RR_RB is RR_OP=88 & RR_RT & RR_RA & RR_RB
+{
+	rotby = RR_RB & 0x1F;
+	RR_RT = (RR_RA << rotby) | (RR_RA >> (32 - rotby));
+}
+
+# roti rt,ra,value
+:roti RI7_RT,RI7_RA,RI7_I7 is RI7_OP=120 & RI7_RT & RI7_RA & RI7_I7
+{
+	rotby = RI7_I7 & 0x1F;
+	RI7_RT = (RI7_RA << rotby) | (RI7_RA >> (32 - rotby));
+}
+
+define pcodeop __spu_rotqby;
+
+# rotqby rt,ra,rb
+:rotqby RR_RT,RR_RA,RR_RB is RR_OP=476 & RR_RT & RR_RA & RR_RB
+{
+	s:4 = RR_RB(12) & 0xF;
+	rTmp1 = zext(0:4);
+	i:4 = 0;
+	<loop>
+	if (i >= 16) goto <loop_end>;
+		b = i + s;
+		if (b < 16) goto <skipsubtraction>;
+		b = b - 16;
+		<skipsubtraction>
+		t:1 = extractind(RR_RA,15 - b);
+		rTmp1 = insertind(rTmp1,t,15 - i);
+		i = i + 1;
+		goto <loop>;
+	<loop_end>
+	RR_RT = rTmp1;
+}
+
+define pcodeop __spu_rotqbyi;
+
+# rotqbyi rt,ra,value
+:rotqbyi RI7_RT,RI7_RA,RI7_I7 is RI7_OP=508 & RI7_RT & RI7_RA & RI7_I7
+{
+	RI7_RT = __spu_rotqbyi(RI7_RA, RI7_I7:4);
+}
+
+define pcodeop __spu_rotqbybi;
+
+# rotqbybi rt,ra,rb
+:rotqbybi RR_RT,RR_RA,RR_RB is RR_OP=460 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT = __spu_rotqbybi(RR_RA, RR_RB);
+}
+
+define pcodeop __spu_rotqbi;
+
+# rotqbi rt,ra,value
+:rotqbi RI7_RT,RI7_RA,RI7_I7 is RI7_OP=472 & RI7_RT & RI7_RA & RI7_I7
+{
+	RI7_RT = __spu_rotqbi(RI7_RA, RI7_I7:4);
+}
+
+define pcodeop __spu_rotqbii;
+
+# rotqbii rt,ra,rb
+:rotqbii RR_RT,RR_RA,RR_RB is RR_OP=504 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT = __spu_rotqbii(RR_RA, RR_RB);
+}
+
+define pcodeop __spu_rothm;
+
+# rothm rt,ra,rb
+:rothm RR_RT,RR_RA,RR_RB is RR_OP=93 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT = __spu_rothm(RR_RA, RR_RB);
+}
+
+# rothmi rt,ra,value
+:rothmi RI7_RT,RI7_RA,RI7_I7 is RI7_OP=125 & RI7_RT & RI7_RA & RI7_I7
+{
+	shift_count = (0 - RI7_I7) % 32;
+	if (shift_count < 16) goto <shift_right>;
+	RI7_RT = 0;
+	goto inst_next;
+	<shift_right>
+	RI7_RT = RI7_RA >> shift_count;
+}
+
+define pcodeop __spu_rotm;
+
+# rotm rt,ra,rb
+:rotm RR_RT,RR_RA,RR_RB is RR_OP=89 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT = __spu_rotm(RR_RA, RR_RB);
+}
+
+# rotmi rt,ra,value
+:rotmi RI7_RT,RI7_RA,RI7_I7 is RI7_OP=121 & RI7_RT & RI7_RA & RI7_I7
+{
+	shift_count = (0 - RI7_I7) % 64;
+	if (shift_count < 32) goto <shift_right>;
+	RI7_RT = 0;
+	goto inst_next;
+	<shift_right>
+	RI7_RT = RI7_RA >> shift_count;
+}
+
+define pcodeop __spu_rotqmby;
+
+# rotqmby rt,ra,rb
+:rotqmby RR_RT,RR_RA,RR_RB is RR_OP=477 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT = __spu_rotqmby(RR_RA, RR_RB);
+}
+
+define pcodeop __spu_rotqmbyi;
+
+# rotqmbyi rt,ra,value
+:rotqmbyi RI7_RT,RI7_RA,RI7_I7 is RI7_OP=509 & RI7_RT & RI7_RA & RI7_I7
+{
+	RI7_RT = __spu_rotqmbyi(RI7_RA, RI7_I7:4);
+}
+
+define pcodeop __spu_rotqmbybi;
+
+# rotqmbybi rt,ra,rb
+:rotqmbybi RR_RT,RR_RA,RR_RB is RR_OP=461 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT = __spu_rotqmbybi(RR_RA, RR_RB);
+}
+
+define pcodeop __spu_rotqmbi;
+
+# rotqmbi rt,ra,value
+:rotqmbi RI7_RT,RI7_RA,RI7_I7 is RI7_OP=473 & RI7_RT & RI7_RA & RI7_I7
+{
+	RI7_RT = __spu_rotqmbi(RI7_RA, RI7_I7:4);
+}
+
+define pcodeop __spu_rotqmbii;
+
+# rotqmbii rt,ra,value
+:rotqmbii RI7_RT,RI7_RA,RI7_I7 is RI7_OP=505 & RI7_RT & RI7_RA & RI7_I7
+{
+	RI7_RT = __spu_rotqmbii(RI7_RA, RI7_I7:4);
+}
+
+define pcodeop __spu_rotmah;
+
+# rotmah rt,ra,rb
+:rotmah RR_RT,RR_RA,RR_RB is RR_OP=94 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT = __spu_rotmah(RR_RA, RR_RB);
+}
+
+define pcodeop __spu_rotmahi;
+
+# rotmahi rt,ra,value
+:rotmahi RI7_RT,RI7_RA,RI7_I7 is RI7_OP=126 & RI7_RT & RI7_RA & RI7_I7
+{
+	RI7_RT = __spu_rotmahi(RI7_RA, RI7_I7:4);
+}
+
+define pcodeop __spu_rotma;
+
+# rotma rt,ra,rb
+:rotma RR_RT,RR_RA,RR_RB is RR_OP=90 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT = __spu_rotma(RR_RA, RR_RB);
+}
+
+define pcodeop __spu_rotmai;
+
+# rotmai rt,ra,value
+:rotmai RI7_RT,RI7_RA,RI7_I7 is RI7_OP=122 & RI7_RT & RI7_RA & RI7_I7
+{
+	RI7_RT = __spu_rotmai(RI7_RA, RI7_I7:4);
+}
+
+
+
+#
+## Compare, Branch, and Halt Instructions
+#
+
+define pcodeop __spu_heq;
+
+# heq ra,rb
+:heq RR_RA,RR_RB is RR_OP=984 & RR_RT & RR_RA & RR_RB
+{
+	__spu_heq(RR_RA, RR_RB);
+}
+
+define pcodeop __spu_heqi;
+
+# heqi ra,value
+:heqi RI10_RA,RI10_I10 is RI10_OP=127 & RI10_RT & RI10_RA & RI10_I10
+{
+	__spu_heqi(RI10_RA, RI10_I10:4);
+}
+
+define pcodeop __spu_hgt;
+
+# hgt ra,rb
+:hgt RR_RA,RR_RB is RR_OP=600 & RR_RT & RR_RA & RR_RB
+{
+	__spu_hgt(RR_RA, RR_RB);
+}
+
+define pcodeop __spu_hgti;
+
+# hgti ra,value
+:hgti RI10_RA,RI10_I10 is RI10_OP=79 & RI10_RT & RI10_RA & RI10_I10
+{
+	__spu_hgti(RI10_RA, RI10_I10:4);
+}
+
+define pcodeop __spu_hlgt;
+
+# hlgt ra,rb
+:hlgt RR_RA,RR_RB is RR_OP=728 & RR_RT & RR_RA & RR_RB
+{
+	__spu_hlgt(RR_RA, RR_RB);
+}
+
+define pcodeop __spu_hlgti;
+
+# hlgti ra,value
+:hlgti RI10_RA,RI10_I10 is RI10_OP=95 & RI10_RT & RI10_RA & RI10_I10
+{
+	__spu_hlgti(RI10_RA, RI10_I10:4);
+}
+
+define pcodeop __spu_ceqb;
+
+# ceqb rt,ra,rb
+:ceqb RR_RT,RR_RA,RR_RB is RR_OP=976 & RR_RT & RR_RA & RR_RB
+{
+	if (RR_RA == RR_RB) goto <true>;
+	RR_RT = 0;
+	goto inst_next;
+	<true>
+	RR_RT = 0xFF;
+}
+
+define pcodeop __spu_ceqbi;
+
+# ceqbi rt,ra,value
+:ceqbi RI10_RT,RI10_RA,RI10_I10 is RI10_OP=126 & RI10_RT & RI10_RA & RI10_I10
+{
+	RI10_RT = __spu_ceqbi(RI10_RA, RI10_I10:4);
+}
+
+define pcodeop __spu_ceqh;
+
+# ceqh rt,ra,rb
+:ceqh RR_RT,RR_RA,RR_RB is RR_OP=968 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT = __spu_ceqh(RR_RA, RR_RB);
+}
+
+define pcodeop __spu_ceqhi;
+
+# ceqhi rt,ra,value
+:ceqhi RI10_RT,RI10_RA,RI10_I10 is RI10_OP=125 & RI10_RT & RI10_RA & RI10_I10
+{
+	RI10_RT = __spu_ceqhi(RI10_RA, RI10_I10:4);
+}
+
+define pcodeop __spu_ceq;
+
+# ceq rt,ra,rb
+:ceq RR_RT,RR_RA,RR_RB is RR_OP=960 & RR_RT & RR_RA & RR_RB
+{
+	local n:16 = RR_RA;
+	local m:16 = RR_RB;
+	RR_RT[0,32]  = zext(n[0,32]  == m[0,32])  * 0xFFFFFFFF:4;
+	RR_RT[32,32] = zext(n[32,32] == m[32,32]) * 0xFFFFFFFF:4;
+	RR_RT[64,32] = zext(n[64,32] == m[64,32]) * 0xFFFFFFFF:4;
+	RR_RT[96,32] = zext(n[96,32] == m[96,32]) * 0xFFFFFFFF:4;
+}
+
+define pcodeop __spu_ceqi;
+
+# ceqi rt,ra,value
+:ceqi RI10_RT,RI10_RA,RI10_I10 is RI10_OP=124 & RI10_RT & RI10_RA & RI10_I10
+{
+	local n:16 = RI10_RA;
+	local m:16 = RI10_I10;
+	RI10_RT[0,32]  = zext(n[0,32]  == m[0,32])  * 0xFFFFFFFF:4;
+	RI10_RT[32,32] = zext(n[32,32] == m[32,32]) * 0xFFFFFFFF:4;
+	RI10_RT[64,32] = zext(n[64,32] == m[64,32]) * 0xFFFFFFFF:4;
+	RI10_RT[96,32] = zext(n[96,32] == m[96,32]) * 0xFFFFFFFF:4;
+}
+
+define pcodeop __spu_cgtb;
+
+# cgtb rt,ra,rb
+:cgtb RR_RT,RR_RA,RR_RB is RR_OP=592 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT = __spu_cgtb(RR_RA, RR_RB);
+}
+
+define pcodeop __spu_cgtbi;
+
+# cgtbi rt,ra,value
+:cgtbi RI10_RT,RI10_RA,RI10_I10 is RI10_OP=78 & RI10_RT & RI10_RA & RI10_I10
+{
+	RI10_RT = __spu_cgtbi(RI10_RA, RI10_I10:4);
+}
+
+define pcodeop __spu_cgth;
+
+# cgth rt,ra,rb
+:cgth RR_RT,RR_RA,RR_RB is RR_OP=584 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT = __spu_cgth(RR_RA, RR_RB);
+}
+
+define pcodeop __spu_cgthi;
+
+# cgthi rt,ra,value
+:cgthi RI10_RT,RI10_RA,RI10_I10 is RI10_OP=115 & RI10_RT & RI10_RA & RI10_I10
+{
+	RI10_RT = __spu_cgthi(RI10_RA, RI10_I10:4);
+}
+
+# cgt rt,ra,rb
+:cgt RR_RT,RR_RA,RR_RB is RR_OP=576 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT[0,32] = zext(RR_RA[0,32] s> RR_RB[0,32]) * 0xFFFFFFFF;
+	RR_RT[32,32] = zext(RR_RA[32,32] s> RR_RB[32,32]) * 0xFFFFFFFF;
+	RR_RT[64,32] = zext(RR_RA[64,32] s> RR_RB[64,32]) * 0xFFFFFFFF;
+	RR_RT[96,32] = zext(RR_RA[96,32] s> RR_RB[96,32]) * 0xFFFFFFFF;
+}
+
+# cgti rt,ra,value
+:cgti RI10_RT,RI10_RA,RI10_I10 is RI10_OP=76 & RI10_RT & RI10_RA & RI10_I10
+{
+	RI10_RT[0,32] = zext(RI10_RA[0,32] s> RI10_I10:4) * 0xFFFFFFFF;
+	RI10_RT[32,32] = zext(RI10_RA[32,32] s> RI10_I10:4) * 0xFFFFFFFF;
+	RI10_RT[64,32] = zext(RI10_RA[64,32] s> RI10_I10:4) * 0xFFFFFFFF;
+	RI10_RT[96,32] = zext(RI10_RA[96,32] s> RI10_I10:4) * 0xFFFFFFFF;
+}
+
+# clgtb rt,ra,rb
+:clgtb RR_RT,RR_RA,RR_RB is RR_OP=720 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT[0,8] = (RR_RA[0,8] > RR_RB[0,8]) * 0xFF;
+	RR_RT[8,8] = (RR_RA[8,8] > RR_RB[8,8]) * 0xFF;
+	RR_RT[16,8] = (RR_RA[16,8] > RR_RB[16,8]) * 0xFF;
+	RR_RT[24,8] = (RR_RA[24,8] > RR_RB[24,8]) * 0xFF;
+	RR_RT[32,8] = (RR_RA[32,8] > RR_RB[32,8]) * 0xFF;
+	RR_RT[40,8] = (RR_RA[40,8] > RR_RB[40,8]) * 0xFF;
+	RR_RT[48,8] = (RR_RA[48,8] > RR_RB[48,8]) * 0xFF;
+	RR_RT[56,8] = (RR_RA[56,8] > RR_RB[56,8]) * 0xFF;
+	RR_RT[64,8] = (RR_RA[64,8] > RR_RB[64,8]) * 0xFF;
+	RR_RT[72,8] = (RR_RA[72,8] > RR_RB[72,8]) * 0xFF;
+	RR_RT[80,8] = (RR_RA[80,8] > RR_RB[80,8]) * 0xFF;
+	RR_RT[88,8] = (RR_RA[88,8] > RR_RB[88,8]) * 0xFF;
+	RR_RT[96,8] = (RR_RA[96,8] > RR_RB[96,8]) * 0xFF;
+	RR_RT[104,8] = (RR_RA[104,8] > RR_RB[104,8]) * 0xFF;
+	RR_RT[112,8] = (RR_RA[112,8] > RR_RB[112,8]) * 0xFF;
+	RR_RT[120,8] = (RR_RA[120,8] > RR_RB[120,8]) * 0xFF;
+}
+
+# clgtbi rt,ra,value
+:clgtbi RI10_RT,RI10_RA,RI10_I10 is RI10_OP=94 & RI10_RT & RI10_RA & RI10_I10
+{
+	RI10_RT[0,8] = (RI10_RA[0,8] > RI10_I10:1) * 0xFF;
+	RI10_RT[8,8] = (RI10_RA[8,8] > RI10_I10:1) * 0xFF;
+	RI10_RT[16,8] = (RI10_RA[16,8] > RI10_I10:1) * 0xFF;
+	RI10_RT[24,8] = (RI10_RA[24,8] > RI10_I10:1) * 0xFF;
+	RI10_RT[32,8] = (RI10_RA[32,8] > RI10_I10:1) * 0xFF;
+	RI10_RT[40,8] = (RI10_RA[40,8] > RI10_I10:1) * 0xFF;
+	RI10_RT[48,8] = (RI10_RA[48,8] > RI10_I10:1) * 0xFF;
+	RI10_RT[56,8] = (RI10_RA[56,8] > RI10_I10:1) * 0xFF;
+	RI10_RT[64,8] = (RI10_RA[64,8] > RI10_I10:1) * 0xFF;
+	RI10_RT[72,8] = (RI10_RA[72,8] > RI10_I10:1) * 0xFF;
+	RI10_RT[80,8] = (RI10_RA[80,8] > RI10_I10:1) * 0xFF;
+	RI10_RT[88,8] = (RI10_RA[88,8] > RI10_I10:1) * 0xFF;
+	RI10_RT[96,8] = (RI10_RA[96,8] > RI10_I10:1) * 0xFF;
+	RI10_RT[104,8] = (RI10_RA[104,8] > RI10_I10:1) * 0xFF;
+	RI10_RT[112,8] = (RI10_RA[112,8] > RI10_I10:1) * 0xFF;
+	RI10_RT[120,8] = (RI10_RA[120,8] > RI10_I10:1) * 0xFF;
+}
+
+define pcodeop __spu_clgth;
+
+# clgth rt,ra,rb
+:clgth RR_RT,RR_RA,RR_RB is RR_OP=712 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT = __spu_clgth(RR_RA, RR_RB);
+}
+
+define pcodeop __spu_clgthi;
+
+# clgthi rt,ra,value
+:clgthi RI10_RT,RI10_RA,RI10_I10 is RI10_OP=93 & RI10_RT & RI10_RA & RI10_I10
+{
+	RI10_RT = __spu_clgthi(RI10_RA, RI10_I10:4);
+}
+
+# clgt rt,ra,rb
+:clgt RR_RT,RR_RA,RR_RB is RR_OP=704 & RR_RT & RR_RA & RR_RB
+{
+	RR_RT[0,32] = zext(RR_RA[0,32] > RR_RB[0,32]) * 0xFFFFFFFF:4;
+	RR_RT[32,32] = zext(RR_RA[32,32] > RR_RB[32,32]) * 0xFFFFFFFF:4;
+	RR_RT[64,32] = zext(RR_RA[64,32] > RR_RB[64,32]) * 0xFFFFFFFF:4;
+	RR_RT[96,32] = zext(RR_RA[96,32] > RR_RB[96,32]) * 0xFFFFFFFF:4;
+}
+
+# clgti rt,ra,value
+:clgti RI10_RT,RI10_RA,RI10_I10 is RI10_OP=92 & RI10_RT & RI10_RA & RI10_I10
+{
+	RI10_RT[0,32] = zext(RI10_RA[0,32] > RI10_I10:4) * 0xFFFFFFFF:4;
+	RI10_RT[32,32] = zext(RI10_RA[32,32] > RI10_I10:4) * 0xFFFFFFFF:4;
+	RI10_RT[64,32] = zext(RI10_RA[64,32] > RI10_I10:4) * 0xFFFFFFFF:4;
+	RI10_RT[96,32] = zext(RI10_RA[96,32] > RI10_I10:4) * 0xFFFFFFFF:4;
+}
+
+# br symbol
+:br targetAddress is RI16_OP=100 & RI16_I16 & RI16_RT=0 & targetAddress
+{
+	goto targetAddress;
+}
+
+# bra symbol
+:bra absoluteAddress is RI16_OP=96 & RI16_I16 & RI16_RT=0 & absoluteAddress
+{
+	goto absoluteAddress;
+}
+
+# brsl rt,symbol
+:brsl RI16_RT,targetAddress is RI16_OP=102 & RI16_I16 & RI16_RT & targetAddress
+{
+	RI16_RT[0,32] = 0;
+	RI16_RT[32,32] = 0;
+	RI16_RT[64,32] = 0;
+	RI16_RT[96,32] = inst_next;
+	call targetAddress;
+}
+
+# brasl rt,symbol
+:brasl RI16_RT,absoluteAddress is RI16_OP=98 & RI16_I16 & RI16_RT & absoluteAddress
+{
+	RI16_RT[0,32] = 0;
+	RI16_RT[32,32] = 0;
+	RI16_RT[64,32] = 0;
+	RI16_RT[96,32] = inst_next;
+	call absoluteAddress;
+}
+
+# bi lr
+:bi RR_RA is RR_OP=424 & RR_RB & RR_RA & RR_RA=0 & RR_RT=0
+{
+	return [RR_RA[96,32]];
+}
+
+# bi ra
+:bi RR_RA is RR_OP=424 & RR_RB & RR_RA & RR_RT=0
+{
+	goto [RR_RA[96,32]];
+}
+
+# iret ra
+:iret RR_RA is RR_OP=600 & RR_RB & RR_RA & RR_RT=0
+{
+	return [srr0];
+}
+
+define pcodeop ReadChannelCount;
+
+# bisled rt,ra
+:bisled RI7_RT,RI7_RA is RI7_OP=427 & RI7_RT & RI7_RA
+{
+	RI7_RT[0,32] = 0;
+	RI7_RT[32,32] = 0;
+	RI7_RT[64,32] = 0;
+	RI7_RT[96,32] = inst_next;
+	if (ReadChannelCount(0:4) == 0:4) goto inst_next;
+	call [RI7_RA[96,32]];
+}
+
+# bisl rt,ra
+:bisl RI7_RT,RI7_RA is RI7_OP=425 & RI7_RT & RI7_RA
+{
+	RI7_RT[0,32] = 0;
+	RI7_RT[32,32] = 0;
+	RI7_RT[64,32] = 0;
+	RI7_RT[96,32] = inst_next;
+	call [RI7_RA[96,32]];
+}
+
+# brnz rt,symbol
+:brnz RI16_RT,targetAddress is RI16_OP=66 & RI16_I16 & RI16_RT & targetAddress
+{
+	if (RI16_RT[96,32] != 0) goto targetAddress;
+}
+
+# brz rt,symbol
+:brz RI16_RT,targetAddress is RI16_OP=64 & RI16_I16 & RI16_RT & targetAddress
+{
+	if (RI16_RT[96,32] == 0) goto targetAddress;
+}
+
+# brhnz rt,symbol
+:brhnz RI16_RT,targetAddress is RI16_OP=70 & RI16_I16 & RI16_RT & targetAddress
+{
+	if ((RI16_RT[96,32] & 0xFFFF) != 0) goto targetAddress;
+}
+
+# brhz rt,symbol
+:brhz RI16_RT,targetAddress is RI16_OP=68 & RI16_I16 & RI16_RT & targetAddress
+{
+	if ((RI16_RT[96,32] & 0xFFFF) == 0) goto targetAddress;
+}
+
+#TODO: handle interrupt enable/disable flags
+
+# biz rt,lr
+:biz RR_RT,RR_RA is RR_OP=296 & RR_RB & RR_RA & RR_RA=0 & RR_RT
+{
+	if (RR_RT[96,32] != 0) goto inst_next;
+	return [RR_RA];
+}
+
+
+# biz rt,ra
+:biz RR_RT,RR_RA is RR_OP=296 & RR_RB & RR_RA & RR_RT
+{
+	if (RR_RT[96,32] != 0) goto inst_next;
+	goto [RR_RA];
+}
+
+# binz rt,lr
+:binz RR_RT,RR_RA is RR_OP=297 & RR_RB & RR_RA & RR_RA=0 & RR_RT
+{
+	if (RR_RT[96,32] == 0) goto inst_next;
+	return [RR_RA];
+}
+
+# binz rt,ra
+:binz RR_RT,RR_RA is RR_OP=297 & RR_RB & RR_RA & RR_RT
+{
+	if (RR_RT[96,32] == 0) goto inst_next;
+	goto [RR_RA];
+}
+
+# bihz rt,lr
+:bihz RR_RT,RR_RA is RR_OP=298 & RR_RB & RR_RA & RR_RA=0 & RR_RT
+{
+	if ((RR_RT[96,32] & 0xFFFF) != 0) goto inst_next;
+	return [RR_RA];
+}
+
+# bihz rt,ra
+:bihz RR_RT,RR_RA is RR_OP=298 & RR_RB & RR_RA & RR_RT
+{
+	if ((RR_RT[96,32] & 0xFFFF) != 0) goto inst_next;
+	goto [RR_RA];
+}
+
+# bihnz rt,lr
+:bihnz RR_RT,RR_RA is RR_OP=299 & RR_RB & RR_RA & RR_RA=0 & RR_RT
+{
+	if ((RR_RT[96,32] & 0xFFFF) == 0) goto inst_next;
+	return [RR_RA];
+}
+
+# bihnz rt,ra
+:bihnz RR_RT,RR_RA is RR_OP=299 & RR_RB & RR_RA & RR_RT
+{
+	if ((RR_RT[96,32] & 0xFFFF) == 0) goto inst_next;
+	goto [RR_RA];
+}
+
+
+
+#
+## Hint-for-Branch Instructions
+#
+
+# hbr brinst,brtarg
+:hbr brinst,HBR_RA is HBR_OP=428 & HBR_0=0 & HBR_ROH & HBR_RA & HBR_ROL
+[ brinst = inst_start + ((HBR_ROH << 9) | (HBR_ROL << 2)); ]{}
+
+# hbra brinst,brtarg
+:hbra brinst,brtarg is HBRA_OP=8 & HBRA_ROH & HBRA_I16 & HBRA_ROL
+[ brinst = inst_start + ((HBRA_ROH << 9) | (HBRA_ROL << 2)); brtarg = HBRA_I16 << 2; ] {}
+
+# hbrr brinst,brtarg
+:hbrr brinst,brtarg is HBRR_OP=9 & HBRR_ROH & HBRR_I16 & HBRR_ROL
+[ brinst = inst_start + ((HBRR_ROH << 9) | (HBRR_ROL << 2)); brtarg = inst_start + (HBRR_I16 << 2); ] {}
+
+
+
+#
+## Floating-Point Instructions
+#
+
+# fa rt,ra,rb
+:fa RR_RT,RR_RA,RR_RB is RR_OP=708 & RR_RB & RR_RA & RR_RT
+{
+}
+
+# dfa rt,ra,rb
+:dfa RR_RT,RR_RA,RR_RB is RR_OP=716 & RR_RB & RR_RA & RR_RT
+{
+}
+
+# fs rt,ra,rb
+:fs RR_RT,RR_RA,RR_RB is RR_OP=709 & RR_RB & RR_RA & RR_RT
+{
+}
+
+# dfs rt,ra,rb
+:dfs RR_RT,RR_RA,RR_RB is RR_OP=717 & RR_RB & RR_RA & RR_RT
+{
+}
+
+# fm rt,ra,rb
+:fm RR_RT,RR_RA,RR_RB is RR_OP=710 & RR_RB & RR_RA & RR_RT
+{
+}
+
+# dfm rt,ra,rb
+:dfm RR_RT,RR_RA,RR_RB is RR_OP=718 & RR_RB & RR_RA & RR_RT
+{
+}
+
+# fma rt,ra,rb,rc
+:fma RRR_RT,RRR_RA,RRR_RB,RRR_RC is RRR_OP=14 & RRR_RB & RRR_RA & RRR_RT & RRR_RC
+{
+}
+
+# dfma rt,ra,rb
+:dfma RR_RT,RR_RA,RR_RB is RR_OP=860 & RR_RB & RR_RA & RR_RT
+{
+}
+
+# fnms rt,ra,rb,rc
+:fnms RRR_RT,RRR_RA,RRR_RB,RRR_RC is RRR_OP=13 & RRR_RB & RRR_RA & RRR_RT & RRR_RC
+{
+}
+
+# dfnms rt,ra,rb
+:dfnms RR_RT,RR_RA,RR_RB is RR_OP=862 & RR_RB & RR_RA & RR_RT
+{
+}
+
+# fms rt,ra,rb,rc
+:fms RRR_RT,RRR_RA,RRR_RB,RRR_RC is RRR_OP=15 & RRR_RB & RRR_RA & RRR_RT & RRR_RC
+{
+}
+
+# dfms rt,ra,rb
+:dfms RR_RT,RR_RA,RR_RB is RR_OP=861 & RR_RB & RR_RA & RR_RT
+{
+}
+
+# dfnma rt,ra,rb
+:dfnma RR_RT,RR_RA,RR_RB is RR_OP=863 & RR_RB & RR_RA & RR_RT
+{
+}
+
+# frest rt,ra
+:frest RI7_RT,RI7_RA is RI7_OP=440 & RI7_I7=0 & RI7_RA & RI7_RT
+{
+}
+
+# frsqest rt,ra
+:frsqest RI7_RT,RI7_RA is RI7_OP=441 & RI7_I7=0 & RI7_RA & RI7_RT
+{
+}
+
+# fi rt,ra,rb
+:fi RR_RT,RR_RA,RR_RB is RR_OP=980 & RR_RB & RR_RA & RR_RT
+{
+}
+
+# csflt rt,ra,scale
+:csflt RI8_RT,RI8_RA,RI8_I8 is RI8_OP=474 & RI8_I8 & RI8_RA & RI8_RT
+{
+}
+
+# cflts rt,ra,scale
+:cflts RI8_RT,RI8_RA,RI8_I8 is RI8_OP=472 & RI8_I8 & RI8_RA & RI8_RT
+{
+}
+
+# cuflt rt,ra,scale
+:cuflt RI8_RT,RI8_RA,RI8_I8 is RI8_OP=475 & RI8_I8 & RI8_RA & RI8_RT
+{
+}
+
+# cfltu rt,ra,scale
+:cfltu RI8_RT,RI8_RA,RI8_I8 is RI8_OP=473 & RI8_I8 & RI8_RA & RI8_RT
+{
+}
+
+# frds rt,ra
+:frds RI7_RT,RI7_RA is RI7_OP=953 & RI7_I7=0 & RI7_RA & RI7_RT
+{
+}
+
+# fesd rt,ra
+:fesd RI7_RT,RI7_RA is RI7_OP=952 & RI7_I7=0 & RI7_RA & RI7_RT
+{
+}
+
+# dfceq rt,ra,rb
+:dfceq RR_RT,RR_RA,RR_RB is RR_OP=963 & RR_RB & RR_RA & RR_RT
+{
+}
+
+# dfcmeq rt,ra,rb
+:dfcmeq RR_RT,RR_RA,RR_RB is RR_OP=971 & RR_RB & RR_RA & RR_RT
+{
+}
+
+# dfcgt rt,ra,rb
+:dfcgt RR_RT,RR_RA,RR_RB is RR_OP=707 & RR_RB & RR_RA & RR_RT
+{
+}
+
+# dfcmgt rt,ra,rb
+:dfcmgt RR_RT,RR_RA,RR_RB is RR_OP=715 & RR_RB & RR_RA & RR_RT
+{
+}
+
+# dftsv rt,ra,value
+:dftsv RI7_RT,RI7_RA is RI7_OP=959 & RI7_I7 & RI7_RA & RI7_RT
+{
+}
+
+# fceq rt,ra,rb
+:fceq RR_RT,RR_RA,RR_RB is RR_OP=962 & RR_RB & RR_RA & RR_RT
+{
+}
+
+# fcmeq rt,ra,rb
+:fcmeq RR_RT,RR_RA,RR_RB is RR_OP=970 & RR_RB & RR_RA & RR_RT
+{
+}
+
+# fcgt rt,ra,rb
+:fcgt RR_RT,RR_RA,RR_RB is RR_OP=706 & RR_RB & RR_RA & RR_RT
+{
+}
+
+# fcmgt rt,ra,rb
+:fcmgt RR_RT,RR_RA,RR_RB is RR_OP=714 & RR_RB & RR_RA & RR_RT
+{
+}
+
+# fscrwr ra
+:fscrwr RI7_RA is RI7_OP=954 & RI7_I7=0 & RI7_RA & RI7_RT
+{
+}
+
+# fscrrd rt
+:fscrrd RI7_RT is RI7_OP=954 & RI7_I7=0 & RI7_RA=0 & RI7_RT
+{
+}
+
+
+
+#
+## Control Instructions
+#
+
+define pcodeop __spu_stop;
+
+# stop
+:stop STOP_OP is RR_OP=0 & RR_RB=0 & STOP_OP
+{
+	__spu_stop(STOP_OP:4);
+}
+
+define pcodeop __spu_stopd;
+
+# stopd
+:stopd is RR_OP=320
+{
+	#TODO
+	__spu_stopd();
+}
+
+# lnop
+:lnop is RR_OP=1 & RR_RB=0 & RR_RA=0 & RR_RT=0 {}
+
+# nop
+:nop RR_RT is RR_OP=513 & RR_RT {}
+
+define pcodeop __spu_sync;
+
+# sync
+:sync SYNC_C is RR_OP=2 & SYNC_C
+{
+	__spu_sync((SYNC_C:4) & 1);
+}
+
+define pcodeop __spu_dsync;
+
+# dsync
+:dsync is RR_OP=3
+{
+	__spu_dsync();	
+}
+
+#mfspr
+
+#mtspr
+
+
+
+#
+## Channel Instructions
+#
+
+#rdch rt,15
+:rdch CH_RT,15 is CH_OP=13 & CH_CA=15 & CH_RT
+{
+	CH_RT[0,32] = 0;
+	CH_RT[32,32] = 0;
+	CH_RT[64,32] = 0;
+	CH_RT[96,32] = srr0;
+}
+
+define pcodeop ReadChannelData;
+
+#rdch rt,ca
+:rdch CH_RT,CH_CA is CH_OP=13 & CH_CA & CH_RT
+{
+	CH_RT = ReadChannelData(CH_CA:4);
+}
+
+#rchcnt rt,ca
+:rchcnt CH_RT,CH_CA is CH_OP=15 & CH_CA & CH_RT
+{
+	CH_RT[0,32] = 0;
+	CH_RT[32,32] = 0;
+	CH_RT[64,32] = 0;
+	CH_RT[96,32] = ReadChannelCount(CH_CA:4);
+}
+
+#wrch 14,rt
+:wrch 14,CH_RT is CH_OP=269 & CH_CA=14 & CH_RT
+{
+	srr0 = CH_RT[96,32];
+}
+
+define pcodeop WriteChannelData;
+
+#wrch ca,rt
+:wrch CH_CA,CH_RT is CH_OP=269 & CH_CA & CH_RT
+{
+	WriteChannelData(CH_CA:4, CH_RT);
+}

@@ -1,0 +1,406 @@
+# sleigh specification file for NVIDIA CUDA SASS (SM30 Kepler architecture)
+
+define endian=little;
+define alignment=8;
+
+define space RAM		type=ram_space		size=8	default;
+define space params		type=ram_space		size=8;
+define space locals		type=ram_space		size=4;
+define space constant0	type=ram_space		size=8;
+define space constant2	type=ram_space		size=8;
+define space register	type=register_space	size=8;
+
+define register offset=0x0 size=4
+[R0  R1  R2  R3  R4  R5  R6  R7
+ R8  R9  R10 R11 R12 R13 R14 R15
+ R16 R17 R18 R19 R20 R21 R22 R23
+ R24 R25 R26 R27 R28 R29 R30 R31
+ R32 R33 R34 R35 R36 R37 R38 R39
+ R40 R41 R42 R43 R44 R45 R46 R47
+ R48 R49 R50 R51 R52 R53 R54 R55
+ R56 R57 R58 R59 R60 R61 R62 RZ ];
+define register offset=0x0 size=8
+[R0_1   R2_3   R4_5   R6_7
+ R8_9   R10_11 R12_13 R14_15
+ R16_17 R18_19 R20_21 R22_23
+ R24_25 R26_27 R28_29 R30_31
+ R32_33 R34_35 R36_37 R38_39
+ R40_41 R42_43 R44_45 R46_47
+ R48_49 R50_51 R52_53 R54_55
+ R56_57 R58_59 R60_61 R62_63];
+define register offset=0x200 size=8	[PC];
+define register offset=0x208 size=1	[P0 P1 P2 P3 P4 P5 P6 PT];
+define register offset=0x210 size=8	[PBKREG];
+define register offset=0x218 size=4	[SR_TID SR_TID.X SR_TID.Y SR_TID.Z SR_CTAID SR_CTAID.X SR_CTAID.Y SR_CTAID.Z];
+define register offset=0x238 size=4 [contextreg];
+
+define token tok (64)
+  op2		= (0,4)
+  num4		= (5,9)
+  cond		= (10,12)
+  excl_flag	= (13,13)
+  dest		= (14,19)
+  res		= (17,19)
+  par2		= (20,25)
+  par1_3	= (26,31)
+  par1_2	= (32,41)
+  par1_1	= (42,45)
+  c_flag	= (46,47)
+  CC_flag	= (48,48)
+  par0		= (49,54)
+  vec_num	= (55,56)
+  mod1		= (57,57)
+  op1		= (58,63)
+
+  skip		= (0,2)
+  s2_flag	= (5,5)
+  hi_flag	= (6,6)
+  s1_flag	= (7,7)
+  dest_e	= (14,19)
+  log2		= (14,16)
+  par2_e	= (20,25)
+  par1_23	= (26,41)
+  par2_off	= (26,41) signed
+  par1		= (26,31)
+  log1		= (49,51)
+  logcode	= (52,53)
+  num3		= (26,45) signed
+  num2		= (26,49) signed
+  num1		= (26,57) signed
+  floatfull	= (26,57)
+  floatred	= (26,45) # reduced size for mantissa
+  logic		= (55,57)
+;
+
+define context contextreg
+  lockedreg		= (0,5)
+  sync			= (6,6)
+  floatmode		= (7,8)
+;
+
+attach variables [dest par0 par1 par2]
+[R0  R1  R2  R3  R4  R5  R6  R7
+ R8  R9  R10 R11 R12 R13 R14 R15
+ R16 R17 R18 R19 R20 R21 R22 R23
+ R24 R25 R26 R27 R28 R29 R30 R31
+ R32 R33 R34 R35 R36 R37 R38 R39
+ R40 R41 R42 R43 R44 R45 R46 R47
+ R48 R49 R50 R51 R52 R53 R54 R55
+ R56 R57 R58 R59 R60 R61 R62 RZ ];
+attach variables [dest_e par2_e]
+[R0_1   _ R2_3   _ R4_5   _ R6_7   _
+ R8_9   _ R10_11 _ R12_13 _ R14_15 _
+ R16_17 _ R18_19 _ R20_21 _ R22_23 _
+ R24_25 _ R26_27 _ R28_29 _ R30_31 _
+ R32_33 _ R34_35 _ R36_37 _ R38_39 _
+ R40_41 _ R42_43 _ R44_45 _ R46_47 _
+ R48_49 _ R50_51 _ R52_53 _ R54_55 _
+ R56_57 _ R58_59 _ R60_61 _ R62_63 _];
+attach variables [res log1 log2]	[P0 P1 P2 P3 P4 P5 P6 PT];
+
+p1: par1_1			is par1_1							{ export *[const]:8 par1_1; }
+p2: par2			is c_flag=0x0 & par2_off=0x0 & par2	{ tmp:8 = zext(par2); export tmp; }
+p2: par2+par2_off	is c_flag=0x0 & par2 & par2_off		{ tmp:8 = zext(par2) + par2_off; export tmp; }
+p2: par1_23			is par1_23							{ export *[const]:8 par1_23; }
+
+c4: "c"[p1][p2] is par1_1 = 0x0 & p1 & p2 & (par1_2=0x0 | par1_2=0x1 | par1_2=0x2 | par1_2=0x3 | par1_2=0x4)
+										{ local tmp:4 = *[constant0]:4	p2; export tmp; }
+c4: "c"[p1][p2] is par1_1 = 0x0 & p1 & p2 { local tmp:4 = *[params]:4		p2; export tmp; }
+c4: "c"[p1][p2] is par1_1 = 0x2 & p1 & p2 { local tmp:4 = *[constant2]:4	p2; export tmp; }
+
+c8: "c"[p1][p2] is par1_1 = 0x0 & p1 & p2 & (par1_2=0x0 | par1_2=0x1 | par1_2=0x2 | par1_2=0x3 | par1_2=0x4)
+										{ local tmp:8 = *[constant0]:8	p2; export tmp; }
+c8: "c"[p1][p2] is par1_1 = 0x0 & p1 & p2 { local tmp:8 = *[params]:8		p2; export tmp; }
+c8: "c"[p1][p2] is par1_1 = 0x2 & p1 & p2 { local tmp:8 = *[constant2]:8	p2; export tmp; }
+
+src4: floatfull is floatmode=1 & floatfull				{ export *[const]:4 floatfull; }
+src4: par1		is c_flag=0x0 & par1					{ local tmp:4 = par1; export tmp; }
+src4: c4		is (c_flag=0x1 | c_flag=0x2) & c4		{ local tmp:4 = c4;   export tmp; }
+src4: num3		is c_flag=0x3 & num3					{ export *[const]:4 num3; }
+src4: floatnorm	is c_flag=0x3 & floatmode=2 & floatred	[ floatnorm = floatred << 12; ] { export *[const]:4 floatnorm; }
+
+src8: c8	is (c_flag=0x1 | c_flag=0x2) & c8	{ local tmp:8 = c8;   export tmp; }
+src8: num3	is c_flag=0x3 & num3				{ export *[const]:8 num3; }
+
+special: SR_TID		is par1_3=0x20 & SR_TID		{ tmp:8 = cpool(0,0); SR_TID	 = *:4 tmp; export SR_TID;		}
+special: SR_TID.X	is par1_3=0x21 & SR_TID.X	{ tmp:8 = cpool(0,1); SR_TID.X	 = *:4 tmp; export SR_TID.X;	}
+special: SR_TID.Y	is par1_3=0x22 & SR_TID.Y	{ tmp:8 = cpool(0,2); SR_TID.Y	 = *:4 tmp; export SR_TID.Y;	}
+special: SR_TID.Z	is par1_3=0x23 & SR_TID.Z	{ tmp:8 = cpool(0,3); SR_TID.Z	 = *:4 tmp; export SR_TID.Z;	}
+special: SR_CTAID	is par1_3=0x24 & SR_CTAID	{ tmp:8 = cpool(0,4); SR_CTAID	 = *:4 tmp; export SR_CTAID;	}
+special: SR_CTAID.X	is par1_3=0x25 & SR_CTAID.X	{ tmp:8 = cpool(0,5); SR_CTAID.X = *:4 tmp; export SR_CTAID.X;	}
+special: SR_CTAID.Y	is par1_3=0x26 & SR_CTAID.Y	{ tmp:8 = cpool(0,6); SR_CTAID.Y = *:4 tmp; export SR_CTAID.Y;	}
+special: SR_CTAID.Z	is par1_3=0x27 & SR_CTAID.Z	{ tmp:8 = cpool(0,7); SR_CTAID.Y = *:4 tmp; export SR_CTAID.Z;	}
+
+exp: num4	is num4 { tmp:8 = 1 << num4; export tmp; }
+
+signstr: ""			is s1_flag=0x1 & s2_flag=0x1 {}
+signstr: ".S32.U32"	is s1_flag=0x1 & s2_flag=0x0 {}
+signstr: ".U32.S32"	is s1_flag=0x0 & s2_flag=0x1 {}
+signstr: ".U32.U32"	is s1_flag=0x0 & s2_flag=0x0 {}
+
+vecstr: ""		is vec_num=0x0 {}
+vecstr: ".X"	is vec_num=0x1 {}
+vecstr: ".Y"	is vec_num=0x2 {}
+vecstr: ".Z"	is vec_num=0x3 {}
+
+condreg: P0	is cond=0x0 & P0 { export P0; }
+condreg: P1	is cond=0x1 & P1 { export P1; }
+condreg: P2	is cond=0x2 & P2 { export P2; }
+condreg: P3	is cond=0x3 & P3 { export P3; }
+condreg: P4	is cond=0x4 & P4 { export P4; }
+condreg: P5	is cond=0x5 & P5 { export P5; }
+condreg: P6	is cond=0x6 & P6 { export P6; }
+
+predication: ""				is excl_flag=0x0 & cond=0x7	{ }
+predication: ":!"			is excl_flag=0x1 & cond=0x7	{ goto inst_next; }
+predication: ":@"^condreg	is excl_flag=0x0 & condreg	{ if !condreg goto inst_next; }
+predication: ":@!"^condreg	is excl_flag=0x1 & condreg	{ if condreg goto inst_next; }
+
+condition: ".LT"		is logic=0x1 & s2_flag=0x1 & par2 & src4 { local result:1 = par2 s<  src4; export result; }
+condition: ".LT.U32"	is logic=0x1 & s2_flag=0x0 & par2 & src4 { local result:1 = par2 <   src4; export result; }
+condition: ".GT"		is logic=0x4 & s2_flag=0x1 & par2 & src4 { local result:1 = par2 s>  src4; export result; }
+condition: ".GT.U32"	is logic=0x4 & s2_flag=0x0 & par2 & src4 { local result:1 = par2 >   src4; export result; }
+condition: ".NE"		is logic=0x5 & s2_flag=0x1 & par2 & src4 { local result:1 = par2 !=  src4; export result; }
+condition: ".NE.U32"	is logic=0x5 & s2_flag=0x0 & par2 & src4 { local result:1 = par2 !=  src4; export result; }
+condition: ".GE"		is logic=0x6 & s2_flag=0x1 & par2 & src4 { local result:1 = par2 s>= src4; export result; }
+condition: ".GE.U32"	is logic=0x6 & s2_flag=0x0 & par2 & src4 { local result:1 = par2 >=  src4; export result; }
+
+logpost: condition^".AND"	is logcode=0x0 & condition & log1 { local result:1 = condition &&  log1; export result; }
+logpost: condition^".AND"	is logcode=0x1 & condition & log1 { local result:1 = condition && !log1; export result; }
+logpost: condition^".OR"	is logcode=0x2 & condition & log1 { local result:1 = condition ||  log1; export result; }
+logpost: condition^".OR"	is logcode=0x3 & condition & log1 { local result:1 = condition || !log1; export result; }
+
+negstr: ""	is (logcode=0x0 | logcode=0x2) { export 1:1; }
+negstr: "!"	is (logcode=0x1 | logcode=0x3) { export 0:1; }
+
+muted: "" is dest = lockedreg & lockedreg != 0 {}
+
+macro saturate(x) {
+	zero = 0x00000000:4; # 0.0
+	one  = 0x3f800000:4; # 1.0
+	if (x f>= zero) goto <skip0>;
+	x = zero;
+	<skip0>
+	if (x f<= one) goto <skip1>;
+	x = one;
+	<skip1>
+}
+
+define pcodeop __syncthreads;
+:^instruction is sync=1 & instruction [ sync=0; globalset(inst_next,sync); ] { build instruction; __syncthreads(); }
+
+# some predefined UNK instructions
+:UNK is op1=0x8 & skip=0x7 {}
+
+# "CC" instructions store their result in both current dest register and next register at once for best decompiler output
+# no implementation for "HI" instructions required, as they're consumed by "CC", may be confused by non-standard code though
+
+:BRA^predication addr is op1=0x10 & op2=0x7 & num2 & predication [ addr = inst_next + num2; ]
+{
+	build predication;
+	PC = addr;
+	goto [PC];
+}
+
+:BRK^predication is op1=0x2a & predication
+{
+	build predication;
+	PC = PBKREG;
+	goto [PC];
+}
+
+:BRX^predication par2,num2 is op1=0x12 & op2=0x7 & par2 & num2 & predication
+{
+	build predication;
+	PC = inst_next + num2 + sext(par2);
+	goto [PC];
+}
+
+:CAL^predication addr is op1=0x14 & op2=0x7 & num2 & predication [ addr = inst_next + num2; ]
+{
+	build predication;
+	R1 = R1 - 8;
+	*[locals]:8 R1 = inst_next;
+	PC = addr;
+	call [PC];
+}
+
+:EXIT^predication is op1=0x20 & predication
+{
+	build predication;
+	PC = 0:8;
+	return [PC];
+}
+
+:FADD32I^predication dest,par2,src4 is op1=0xa & op2=0x2 & dest & par2 & src4 & predication [ floatmode=1; ]
+{
+	dest = par2 f+ src4;
+}
+
+:FFMA^predication dest,par2,src4,par0 is op1=0xc & s2_flag=0x0 & dest & par2 & src4 & par0 & predication [ floatmode=2; ]
+{
+	dest = par2 f* src4 f+ par0;
+}
+
+:FFMA.SAT^predication dest,par2,src4,par0 is op1=0xc & s2_flag=0x1 & dest & par2 & src4 & par0 & predication [ floatmode=2; ]
+{
+	dest = par2 f* src4 f+ par0;
+	saturate(dest);
+}
+
+:FMUL^predication dest,par2,src4 is op1=0x16 & dest & par2 & src4 & predication
+{
+	build predication;
+	dest = par2 f* src4;
+}
+
+:I2F^predication dest,par1 is op1=0x6 & op2=0x4 & dest & par1 & predication
+{
+	build predication;
+	dest = int2float(par1);
+}
+
+:IADD32I^predication dest,par2,num1 is op1=0x2 & op2=0x2 & dest & par2 & num1 & predication
+{
+	build predication;
+	dest = par2 + num1;
+}
+
+:IMAD^predication dest,par2,src4,par0 is op1=0x8 & hi_flag=0x0 & dest & par2 & par0 & src4 & predication
+{
+	build predication;
+	dest = par2 * src4 + par0;
+}
+
+:IMAD^signstr^".HI.X"predication dest,par2,par0,src4 is op1=0x8 & hi_flag=0x1 & vec_num=0x1 & signstr & dest & par2 & par0 & src4 & predication
+[ lockedreg = 0; globalset(inst_next,lockedreg); ] {}
+
+:IMNMX^predication dest,par2,src4,log1 is op1=0x2 & op2=0x3 & s2_flag=0x1 & logcode=0x0 & dest & par2 & src4 & log1 & predication
+{
+	build predication;
+	dest = par2;
+	if (src4 s>= dest) goto inst_next;
+	dest = src4;
+}
+
+:IMNMX^predication dest,par2,src4,log1 is op1=0x2 & op2=0x3 & s2_flag=0x1 & logcode=0x1 & dest & par2 & src4 & log1 & predication
+{
+	build predication;
+	dest = par2;
+	if (src4 s<= dest) goto inst_next;
+	dest = src4;
+}
+
+# cannot implement with umin because of using in switch-case
+:IMNMX.U32^predication dest,par2,src4,log1 is op1=0x2 & op2=0x3 & s2_flag=0x0 & logcode=0x0 & dest & par2 & src4 & log1 & predication
+{
+	build predication;
+	dest = par2;
+	if (src4 >= dest) goto inst_next;
+	dest = src4;
+}
+
+:IMNMX.U32^predication dest,par2,src4,!log1 is op1=0x2 & op2=0x3 & s2_flag=0x0 & logcode=0x1 & dest & par2 & src4 & log1 & predication
+{
+	build predication;
+	dest = par2;
+	if (src4 <= dest) goto inst_next;
+	dest = src4;
+}
+
+:ISCADD^predication dest".CC",par2,src8,exp is op1=0x10 & op2=0x3 & CC_flag=0x1 & dest & par2 & src8 & exp & predication & dest_e [ lockedreg = dest + 1; globalset(inst_next,lockedreg); ]
+{
+	build predication;
+	dest_e = src8 + sext(par2) * exp;
+}
+
+:ISETP^logpost^predication res,log2,par2,src4,negstr^log1 is op1=0x6 & op2=0x3 & res & log2 & par2 & src4 & negstr & log1 & logpost & predication
+{
+	build predication;
+	res = logpost;
+}
+
+:LD.E^predication dest,[par2] is op1=0x21 & dest & par2 & predication & par2_e
+{
+	build predication;
+	dest = *:4 par2_e;
+}
+
+:LDC^predication dest,c4 is op1=0x5 & dest & c4 & predication
+{
+	build predication;
+	dest = c4;
+}
+
+:LDL^predication dest,[par2] is op1=0x30 & dest & par2 & predication
+{
+	build predication;
+	dest = *[locals]:4 par2;
+}
+
+:MOV^predication R1,"c"[p1][p2] is op1=0xa & op2=0x4 & dest=0x1 & c_flag=0x1 & par1_1 = 0x0 & par1_23 = 0x44 & R1 & p1 & p2 & predication {}
+
+:MOV^predication dest,src4 is op1=0xa & op2=0x4 & dest & src4 & predication
+{
+	build predication;
+	dest = src4;
+}
+
+:MOV32I^predication dest,num1 is op1=0x6 & op2=0x2 & dest & num1 & muted & predication {}
+
+:MOV32I^predication dest,num1 is op1=0x6 & op2=0x2 & dest & num1 & predication
+{
+	build predication;
+	dest = num1;
+}
+
+:MUFU.EX2^predication is op1=0x32 & op2=0x0 & predication
+{
+
+}
+
+:PBK^predication addr is op1=0x1a & num2 & predication [ addr = inst_next + num2; ]
+{
+	build predication;
+	PBKREG = addr;
+}
+
+:RET^predication is op1=0x24 & predication
+{
+	build predication;
+	ret = *[locals]:8 R1;
+	R1 = R1 + 8;
+	PC = ret;
+	return [PC];
+}
+
+:RRO.EX2^predication dest,src4 is op1=0x18 & op2=0x0 & dest & src4 & predication
+{
+	dest = src4;
+}
+
+:S2R^predication dest,special is op1=0xb & dest & special & predication
+{
+	build predication;
+	dest = special;
+}
+
+:SHL^predication dest,par2,src4 is op1=0x18 & op2=0x3 & dest & par2 & src4 & predication
+{
+	build predication;
+	dest = par2 << src4;
+}
+
+:SSY^predication addr is op1=0x18 & op2=0x7 & predication & num2 [ addr = inst_next + num2; ] {}
+
+:ST.E^predication [par2],dest is op1=0x25 & dest & par2 & par2_e & predication
+{
+	build predication;
+	*:4 par2_e = dest;
+}
+
+:STL^predication [par2],dest is op1=0x32 & op2=0x5 & dest & par2 & predication
+{
+	build predication;
+	*[locals]:4 par2 = dest;
+}

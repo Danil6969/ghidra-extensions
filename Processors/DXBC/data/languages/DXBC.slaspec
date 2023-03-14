@@ -1,0 +1,184 @@
+# sleigh specification file for DirectX bytecode (compute shaders 5.0 only)
+
+# cpool modes:
+#   0 is the output vector decoding
+#   1 is the input vector decoding (reuses output mask)
+
+define endian=little;
+define alignment=4;
+
+define space RAM					type=ram_space			size=4	default;
+define space RWStructuredBuffers	type=ram_space			size=4;
+define space register				type=register_space		size=4;
+
+define register offset=0x0 size=4
+[r0  r1  r2  r3  r4  r5  r6  r7
+ r8  r9  r10 r11 r12 r13 r14 r15
+ r16 r17 r18 r19 r20 r21 r22 r23
+ r24 r25 r26 r27 r28 r29 r30 r31
+ r32 r33 r34 r35 r36 r37 r38 r39
+ r40 r41 r42 r43 r44 r45 r46 r47
+ r48 r49 r50 r51 r52 r53 r54 r55
+ r56 r57 r58 r59 r60 r61 r62 r63];
+define register offset=0x4000 size=4
+[u0  u1  u2  u3  u4  u5  u6  u7
+ u8  u9  u10 u11 u12 u13 u14 u15
+ u16 u17 u18 u19 u20 u21 u22 u23
+ u24 u25 u26 u27 u28 u29 u30 u31
+ u32 u33 u34 u35 u36 u37 u38 u39
+ u40 u41 u42 u43 u44 u45 u46 u47
+ u48 u49 u50 u51 u52 u53 u54 u55
+ u56 u57 u58 u59 u60 u61 u62 u63];
+define register offset=0x8000 size=4	[pc sp];
+define register offset=0x8008 size=8	[contextreg];
+
+define token opcodes (32)
+  op1	= (0,7)
+  op2	= (8,23)
+  flag1	= (24,24)
+;
+
+define token operands (32)
+  uavop	= (0,5)
+  uavn	= (0,5)
+  reg0	= (0,5)
+;
+
+define token literals (32)
+  val1		= (0,31)
+  val2		= (0,31)
+
+  stride	= (11,30)
+;
+
+define token vecenc (16)
+  vec0	= (4,7)
+  vec1	= (4,11)
+  
+  ovec	= (4,7)
+;
+
+define token opmode (16)
+  mode	= (0,7)
+;
+
+define context contextreg
+  offs	= (0,31) noflow
+
+  # vector targets encoding temporaries
+  enc0	= (32,35) # output
+  enc1	= (36,37) # input
+  enc2	= (38,38) # extracted output bits
+
+  # cpool types: 0 = uint; 1 = float; 2 = int
+  type0	= (39,40) # output
+  type1	= (41,42) # input 1
+  type2	= (43,44) # input 2
+  type3	= (45,46) # input 3
+
+  taken	= (47,47) noflow
+;
+
+attach variables [reg0]
+[r0  r1  r2  r3  r4  r5  r6  r7
+ r8  r9  r10 r11 r12 r13 r14 r15
+ r16 r17 r18 r19 r20 r21 r22 r23
+ r24 r25 r26 r27 r28 r29 r30 r31
+ r32 r33 r34 r35 r36 r37 r38 r39
+ r40 r41 r42 r43 r44 r45 r46 r47
+ r48 r49 r50 r51 r52 r53 r54 r55
+ r56 r57 r58 r59 r60 r61 r62 r63];
+attach variables [uavop]
+[u0  u1  u2  u3  u4  u5  u6  u7
+ u8  u9  u10 u11 u12 u13 u14 u15
+ u16 u17 u18 u19 u20 u21 u22 u23
+ u24 u25 u26 u27 u28 u29 u30 u31
+ u32 u33 u34 u35 u36 u37 u38 u39
+ u40 u41 u42 u43 u44 u45 u46 u47
+ u48 u49 u50 u51 u52 u53 u54 u55
+ u56 u57 u58 u59 u60 u61 u62 u63];
+
+attach names [ flag1 ] [
+ "" "refactoringAllowed" ];
+
+attach names [ ovec ] [
+ ""    ".x"   ".y"   ".xy"
+ ".z"  ".xz"  ".yz"  ".xyz"
+ ".w"  ".xw"  ".yw"  ".xyw"
+ ".zw" ".xzw" ".yzw" ".xyzw"];
+
+vecsym: ""	is enc2=0 {}
+vecsym: "x"	is enc2=1 & enc1=0 {}
+vecsym: "y"	is enc2=1 & enc1=1 {}
+vecsym: "z"	is enc2=1 & enc1=2 {}
+vecsym: "w"	is enc2=1 & enc1=3 {}
+
+i0: vecsym is vec1 & enc0 & vecsym [ enc1 = vec1 & 3; 		enc2 = enc0 & 1; ]		{}
+i1: vecsym is vec1 & enc0 & vecsym [ enc1 = vec1 >> 2 & 3;	enc2 = enc0 >> 1 & 1; ]	{}
+i2: vecsym is vec1 & enc0 & vecsym [ enc1 = vec1 >> 4 & 3;	enc2 = enc0 >> 2 & 1; ]	{}
+i3: vecsym is vec1 & enc0 & vecsym [ enc1 = vec1 >> 6 & 3;	enc2 = enc0 >> 3 & 1; ]	{}
+
+ivec: "" is enc0=0 {}
+ivec: "."^i0^i1^i2^i3 is i0 & i1 & i2 & i3 {}
+
+sel: reg0".x" 	is vec0=0;		mode=0x10; reg0; type0					 { ptr:4 = cpool(reg0,type0,0,1);	export *:4 ptr; }
+sel: reg0".y" 	is vec0=1;		mode=0x10; reg0; type0					 { ptr:4 = cpool(reg0,type0,0,2);	export *:4 ptr; }
+sel: reg0".z" 	is vec0=2;		mode=0x10; reg0; type0					 { ptr:4 = cpool(reg0,type0,0,4);	export *:4 ptr; }
+sel: reg0".w" 	is vec0=3;		mode=0x10; reg0; type0					 { ptr:4 = cpool(reg0,type0,0,8);	export *:4 ptr; }
+
+out: reg0^ovec	is vec0 & ovec;	mode=0x10; reg0; type0 [ enc0 = vec0; ]	 { ptr:4 = cpool(reg0,type0,0,vec0);		export *:4 ptr; }
+in1: reg0^ivec	is vec1 & ivec;	mode=0x10; reg0; type1; enc0			 { ptr:4 = cpool(reg0,type1,1,vec1,enc0);	export *:4 ptr; }
+in2: reg0^ivec	is vec1 & ivec;	mode=0x10; reg0; type2; enc0			 { ptr:4 = cpool(reg0,type2,1,vec1,enc0);	export *:4 ptr; }
+
+off: addr is offs [ addr = inst_start + offs; ] { export *:4 addr; }
+
+:cs_5_0 is val1; op1=0x50; val2 {}
+
+:and out,in1,in2 is op1=0x1; out; in1; in2
+{
+	out = in1 & in2;
+}
+
+:else is op1=0x12; off
+{
+	goto off;
+}
+
+:endif is op1=0x15 {}
+
+#:endloop is op1=0x16 {}
+
+:if_z sel is op1=0x1f & op2=0x0; sel; off
+{
+	if (sel != 0) goto off;
+}
+
+:if_nz sel is op1=0x1f & op2=0x400; sel; off
+{
+	if (sel == 0) goto off;
+}
+
+:loop is op1=0x30 {}
+
+:mov out,in1 is op1=0x36; out; in1
+{
+	out = in1;
+}
+
+:or is op1=0x3c {}
+
+:ret is op1=0x3e
+{
+	pc = *sp;
+	sp = sp + 4;
+	return [pc];
+}
+
+:dcl_globalFlags flag1 is op1=0x6a & op2=0x8 & flag1 {}
+
+:dcl_uav_structured uavop, val1 is op1=0x9e; op2=0x11e0; uavop & uavn; val1
+{
+	uavop = *[RWStructuredBuffers]:4 (uavn:4 * 4);
+}
+
+:ld_structured_indexable "stride"=stride is op1=0xa7; stride {}

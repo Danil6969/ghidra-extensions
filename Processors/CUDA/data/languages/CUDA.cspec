@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<compiler_spec>
+  <global>
+    <range space="RAM"/>
+    <range space="constant0"/>
+    <range space="constant2"/>
+  </global>
+  <stackpointer register="R1" space="locals"  growth="negative"/>
+  <aggressivetrim signext="true"/>
+  <returnaddress>
+    <varnode space="stack" offset="0" size="8"/>
+  </returnaddress>
+  <default_proto>
+    <prototype name="__stdcall" extrapop="unknown" stackshift="8">
+      <input>
+        <pentry minsize="1" maxsize="500" align="4">
+          <addr offset="0x140" space="params"/>
+        </pentry>
+      </input>
+      <output>
+      </output>
+      <unaffected>
+        <register name="R1"/>
+      </unaffected>
+      <pcode inject="uponentry">
+        <body>
+          RZ = 0:4;
+          PT = 1:1;
+        </body>
+      </pcode>
+    </prototype>
+  </default_proto>
+</compiler_spec>
