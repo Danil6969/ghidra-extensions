@@ -1,0 +1,13 @@
+apply from: "$rootProject.projectDir/gradle/distributableGhidraExtension.gradle"
+apply from: "$rootProject.projectDir/gradle/javaProject.gradle"
+apply from: "$rootProject.projectDir/gradle/javaTestProject.gradle"
+//apply plugin: 'java'
+apply plugin: 'eclipse'
+eclipse.project.name = 'Ghidra C++ Class Analyzer'
+
+dependencies {
+	api project(':Decompiler')
+	api project(':GraphServices')
+	api project(':MicrosoftCodeAnalyzer')
+	api project(':PDB')
+}
