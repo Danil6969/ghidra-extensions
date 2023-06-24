@@ -390,8 +390,9 @@ public class ClassTypeInfoUtils {
 					}
 				}
 			}
-			struct.setPackingEnabled(true);
-			struct.setToMachineAligned();
+			// Who ever said this???
+			//struct.setPackingEnabled(true);
+			//struct.setToMachineAligned();
 			struct = (Structure) dtm.resolve(struct, DataTypeConflictHandler.REPLACE_HANDLER);
 			return dtm.getPointer(struct);
 		} catch (DuplicateNameException e) {
