@@ -1,13 +1,10 @@
-package ghidra.app.cmd.data.rtti.borland.delphi;
+package ghidra.app.cmd.data.rtti.borland.delphi.datatype;
 
 import ghidra.pcode.utils.Utils;
-import ghidra.program.model.address.Address;
-import ghidra.program.model.address.AddressOutOfBoundsException;
-import ghidra.program.model.address.AddressSpace;
+import ghidra.program.model.address.*;
 import ghidra.program.model.data.*;
 import ghidra.program.model.listing.Program;
-import ghidra.program.model.mem.Memory;
-import ghidra.program.model.mem.MemoryAccessException;
+import ghidra.program.model.mem.*;
 import ghidra.program.model.reloc.Relocation;
 
 import java.util.List;
@@ -16,25 +13,25 @@ public class TVmt {
 	public static StructureDataType getDataType(CategoryPath path, DataTypeManager manager, long maxLength) {
 		PointerDataType pointerDT = PointerDataType.dataType;
 		int pointerSize = pointerDT.getLength();
-		StructureDataType VirtualMethodTableDT = new StructureDataType(path, "TVmt", 0, manager);
-		VirtualMethodTableDT.add(pointerDT, "SelfPtr", "Pointer to self");
-		VirtualMethodTableDT.add(pointerDT, "IntfTable", "Pointer to interface table");
-		VirtualMethodTableDT.add(pointerDT, "AutoTable", "Pointer to automation initialization");
-		VirtualMethodTableDT.add(pointerDT, "InitTable", "Pointer to object initialization");
-		VirtualMethodTableDT.add(new PointerDataType(TTypeInfo.getDataType(path, manager)), "TypeInfo", "Pointer to type information table");
-		VirtualMethodTableDT.add(pointerDT, "FieldTable", "Pointer to field definition table");
-		VirtualMethodTableDT.add(pointerDT, "MethodTable", "Pointer to method definition table");
-		VirtualMethodTableDT.add(pointerDT, "DynamicTable", "Pointer to dynamic method table");
-		VirtualMethodTableDT.add(new PointerDataType(PascalString255DataType.dataType), "ClassName", "Class name pointer");
-		VirtualMethodTableDT.add(AbstractIntegerDataType.getSignedDataType(pointerSize, manager), "InstanceSize", "Instance size");
-		VirtualMethodTableDT.add(pointerDT, "Parent", "Pointer to parent class");
-		while (VirtualMethodTableDT.getLength() < maxLength - (maxLength % pointerSize)) {
-			VirtualMethodTableDT.add(pointerDT);
+		StructureDataType dt = new StructureDataType(path, "TVmt", 0, manager);
+		dt.add(pointerDT, "SelfPtr", "Pointer to self");
+		dt.add(pointerDT, "IntfTable", "Pointer to interface table");
+		dt.add(pointerDT, "AutoTable", "Pointer to automation initialization");
+		dt.add(pointerDT, "InitTable", "Pointer to object initialization");
+		dt.add(PTypeInfo.getDataType(path, manager), "TypeInfo", "Pointer to type information table");
+		dt.add(pointerDT, "FieldTable", "Pointer to field definition table");
+		dt.add(pointerDT, "MethodTable", "Pointer to method definition table");
+		dt.add(pointerDT, "DynamicTable", "Pointer to dynamic method table");
+		dt.add(PShortString.getDataType(path, manager), "ClassName", "Class name pointer");
+		dt.add(AbstractIntegerDataType.getSignedDataType(pointerSize, manager), "InstanceSize", "Instance size");
+		dt.add(pointerDT, "Parent", "Pointer to parent class");
+		while (dt.getLength() < maxLength - (maxLength % pointerSize)) {
+			dt.add(pointerDT);
 		}
-		while (VirtualMethodTableDT.getLength() < maxLength) {
-			VirtualMethodTableDT.add(Undefined.getUndefinedDataType(1));
+		while (dt.getLength() < maxLength) {
+			dt.add(Undefined.getUndefinedDataType(1));
 		}
-		return VirtualMethodTableDT;
+		return dt;
 	}
 
 	public static boolean isValid(Address address, List<Relocation> relocations, Program program) {
@@ -94,9 +91,7 @@ public class TVmt {
 				str.append(c);
 			}
 			return str.toString();
-		} catch (MemoryAccessException e) {
-			return null;
-		} catch (NullPointerException e) {
+		} catch (MemoryAccessException | NullPointerException e) {
 			return null;
 		}
 	}

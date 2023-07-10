@@ -1,6 +1,6 @@
 package ghidra.app.plugin.prototype;
 
-import ghidra.app.cmd.data.rtti.borland.delphi.*;
+import ghidra.app.cmd.data.rtti.borland.delphi.datatype.*;
 import ghidra.app.services.*;
 import ghidra.app.util.importer.MessageLog;
 import ghidra.pcode.utils.Utils;
@@ -9,17 +9,15 @@ import ghidra.program.model.data.*;
 import ghidra.program.model.listing.*;
 import ghidra.program.model.mem.*;
 import ghidra.program.model.reloc.*;
-import ghidra.program.model.symbol.SourceType;
-import ghidra.program.model.symbol.Symbol;
-import ghidra.program.model.symbol.SymbolTable;
+import ghidra.program.model.symbol.*;
 import ghidra.program.model.util.CodeUnitInsertionException;
 import ghidra.util.InvalidNameException;
 import ghidra.util.bytesearch.*;
-import ghidra.util.exception.CancelledException;
-import ghidra.util.exception.InvalidInputException;
+import ghidra.util.exception.*;
 import ghidra.util.task.TaskMonitor;
 import org.apache.commons.lang3.ArrayUtils;
 
+import java.lang.Byte;
 import java.util.*;
 
 public class BorlandDelphiRttiAnalyzer extends AbstractAnalyzer {
@@ -95,10 +93,14 @@ public class BorlandDelphiRttiAnalyzer extends AbstractAnalyzer {
 		} catch (InvalidNameException e) {
 			return false;
 		}
+		StringDT = PascalString255DataType.dataType;
+		String compilerVersion = getCompilerVersion();
+		if (compilerVersion == null) {
+			return false;
+		}
 
 		TTypeKindDT = TTypeKind.getDataType(systemPath, dataTypeManager);
 		TTypeInfoDT = TTypeInfo.getDataType(systemPath, dataTypeManager);
-		StringDT = PascalString255DataType.dataType;
 		PointerDT = PointerDataType.dataType;
 
 		relocationTable = program.getRelocationTable();
@@ -112,6 +114,22 @@ public class BorlandDelphiRttiAnalyzer extends AbstractAnalyzer {
 		ready = new LinkedList<>();
 		pending = new LinkedList<>();
 		return true;
+	}
+
+	private String getCompilerVersion() {
+		MemoryBlock rdata = memory.getBlock(".rdata");
+		if (rdata == null) return null;
+		Address address = rdata.getStart();
+		String string = readCString(address);
+		if (string == null) return null;
+		String searchString = "compiler version";
+		if (!string.contains(searchString)) return null;
+		String versionString = string.substring(string.indexOf(searchString) + searchString.length());
+		if (!versionString.contains("(")) return null;
+		versionString = versionString.substring(0, versionString.indexOf("("));
+		versionString = versionString.replace(" ", ""); // Delete extra space chars
+		Data data = deleteCreateData(address, TerminatedStringDataType.dataType);
+		return versionString;
 	}
 
 	private void putTTypeInfo(Address address) {
@@ -268,6 +286,21 @@ public class BorlandDelphiRttiAnalyzer extends AbstractAnalyzer {
 			return space.getAddress(offset); // Assume address space is the same
 		}
 		catch (MemoryAccessException | AddressOutOfBoundsException e) {
+			return null;
+		}
+	}
+
+	private String readCString(Address address) {
+		if (address == null) return null;
+		try {
+			StringBuilder str = new StringBuilder();
+			while (readNumber(address, 1) != 0) {
+				char c = (char) readNumber(address, 1);
+				address = address.add(1);
+				str.append(c);
+			}
+			return str.toString();
+		} catch (MemoryAccessException | NullPointerException e) {
 			return null;
 		}
 	}
