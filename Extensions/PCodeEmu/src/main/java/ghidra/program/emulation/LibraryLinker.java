@@ -15,6 +15,7 @@
  */
 package ghidra.program.emulation;
 
+import db.Transaction;
 import ghidra.app.plugin.core.debug.service.emulation.DebuggerPcodeMachine;
 import ghidra.app.plugin.core.debug.service.modules.DefaultModuleMapProposal;
 import ghidra.app.plugin.core.progmgr.ProgramManagerPlugin;
@@ -35,7 +36,6 @@ import ghidra.trace.model.guest.TracePlatform;
 import ghidra.trace.model.memory.*;
 import ghidra.trace.model.modules.*;
 import ghidra.trace.model.thread.TraceThread;
-import ghidra.util.database.UndoableTransaction;
 import ghidra.util.exception.DuplicateNameException;
 import org.apache.commons.lang3.ArrayUtils;
 
@@ -73,8 +73,7 @@ public class LibraryLinker {
 		addModules(trace, currentProgram, programManager);
 		setImports(currentProgram, programManager, moduleManager.getAllModules(), isBigEndian);
 		relocateModules(programManager, moduleManager.getAllModules());
-		try (UndoableTransaction tid = UndoableTransaction.
-				start(trace, "Write state")) {
+		try (Transaction tx = trace.openTransaction("Write state")) {
 			emu.writeDown(host, 0, 0);
 		}
 	}
@@ -125,8 +124,7 @@ public class LibraryLinker {
 			String name = program.getName();
 			String moduleId = "Module[" + name + "]";
 			TraceModule module = null;
-			try (UndoableTransaction tid = UndoableTransaction.
-					start(trace, "Add modules")) {
+			try (Transaction tx = trace.openTransaction("Add modules")) {
 				AddressRange range = getRange(program, moduleManager.getAllModules());
 				if (range == null) {
 					addError("Couldn't add module \"" + name + "\" because it has invalid range");
@@ -138,9 +136,7 @@ public class LibraryLinker {
 				addError("Duplicate name detected: " + moduleId);
 			}
 			if (module == null) continue;
-			if (program == currentProgram) continue;
-			try (UndoableTransaction tid = UndoableTransaction.
-					start(trace, "Add regions")) {
+			try (Transaction tx = trace.openTransaction("Add regions")) {
 				long shift = module.getBase().getOffset() - program.getImageBase().getOffset();
 				MemoryBlock[] blocks = program.getMemory().getBlocks();
 				for (MemoryBlock block : blocks) {
@@ -148,19 +144,23 @@ public class LibraryLinker {
 					moduleId = "Module[" + start + "-" + name + ":" + block.getName() + "]";
 					long blockSize = block.getSize();
 					AddressRange range = new AddressRangeImpl(start, blockSize);
-					try {
-						memoryManager.addRegion(moduleId, Lifespan.nowOn(0), range, TraceMemoryFlag.READ,
-								TraceMemoryFlag.WRITE, TraceMemoryFlag.EXECUTE);
-						Memory memory = program.getMemory();
-						byte[] buf = new byte[(int) blockSize];
-						memory.getBytes(block.getStart(), buf);
-						memoryManager.putBytes(0, start, ByteBuffer.wrap(buf));
+					if (program != currentProgram) {
+						try {
+							memoryManager.addRegion(moduleId, Lifespan.nowOn(0), range, TraceMemoryFlag.READ,
+									TraceMemoryFlag.WRITE, TraceMemoryFlag.EXECUTE);
+						} catch (DuplicateNameException e) {
+							addError("Duplicate name detected: " + moduleId);
+						}
 					}
-					catch (DuplicateNameException e) {
-						addError("Duplicate name detected: " + moduleId);
-					}
-					catch (MemoryAccessException e) {
-						addError("Couldn't read in: " + moduleId);
+					if (block.isInitialized()) {
+						try {
+							Memory memory = program.getMemory();
+							byte[] buf = new byte[(int) blockSize];
+							memory.getBytes(block.getStart(), buf);
+							memoryManager.putBytes(0, start, ByteBuffer.wrap(buf));
+						} catch (MemoryAccessException e) {
+							addError("Couldn't read in: " + moduleId);
+						}
 					}
 				}
 			}
@@ -208,12 +208,7 @@ public class LibraryLinker {
 		for (TraceModule module : modules) {
 			String programName = module.getName();
 			Program program = findProgram(programName, programs);
-			try {
-				RelocationResolver.relocateAll(program, module, state);
-			}
-			catch (MemoryAccessException e) {
-				addError("Memory access exception while relocating " + programName);
-			}
+			RelocationResolver.relocateAll(program, module, state);
 		}
 	}
 
@@ -244,12 +239,26 @@ public class LibraryLinker {
 			}
 			Address key = externalReference.getFromAddress();
 			long shift = getShift(library, modules, programManager.getAllOpenPrograms());
-			Address value = symbols.get(0).getAddress().add(shift);
+			Symbol symbol = symbols.get(0);
+			if (symbol.getAddress() instanceof SpecialAddress && symbol.getAddress().toString().equals("NO ADDRESS")) {
+				continue; // Encountered artificial label with no valid address. Should we skip it?
+			}
+			Address value = symbol.getAddress().add(shift);
 			int size = value.getPointerSize();
 			byte[] bytes = value.getOffsetAsBigInteger().toByteArray();
+
+			// Remove extra zero bytes
+			while (bytes.length > size) {
+				if (bytes[0] != 0) {
+					addError("Byte array contains non-zero extra byte: " + bytes[0] + " for address " + value);
+				}
+				bytes = ArrayUtils.remove(bytes, 0);
+			}
+			// Reverse if big endian
 			if (!isBigEndian) {
 				ArrayUtils.reverse(bytes);
 			}
+
 			state.setVar(key, size, false, bytes);
 		}
 	}

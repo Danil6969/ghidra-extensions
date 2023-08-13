@@ -530,9 +530,9 @@ public class PCodeDumpSF extends GhidraScript {
 		DataType returnType = proto.getReturnType();
 		export("PROTO_RETTYPE", 		id, dtID(returnType));
 		exportType(returnType);
-		GenericCallingConvention cc = proto.getGenericCallingConvention();
+		String cc = proto.getModelName();
 		if (cc != null) {
-			export("PROTO_CALLING_CONVENTION", id, cc.toString());
+			export("PROTO_CALLING_CONVENTION", id, cc);
 		}
 		export("PROTO_IS_VOID", 		id, Boolean.toString(proto.hasNoReturn()));
 		export("PROTO_HAS_THIS", 		id, Boolean.toString(proto.hasThisPointer()));

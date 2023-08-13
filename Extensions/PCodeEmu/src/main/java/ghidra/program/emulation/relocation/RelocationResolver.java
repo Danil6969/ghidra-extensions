@@ -17,12 +17,11 @@ package ghidra.program.emulation.relocation;
 
 import ghidra.pcode.exec.PcodeExecutorState;
 import ghidra.program.model.listing.Program;
-import ghidra.program.model.mem.MemoryAccessException;
 import ghidra.trace.model.modules.TraceModule;
 
 public class RelocationResolver {
 
-	public static void relocateAll(Program program, TraceModule module, PcodeExecutorState<byte[]> state) throws MemoryAccessException {
+	public static void relocateAll(Program program, TraceModule module, PcodeExecutorState<byte[]> state) {
 		DynamicRelocator relocator = getRelocator(program.getExecutableFormat(), program, module, state);
 		relocator.relocateAll();
 	}

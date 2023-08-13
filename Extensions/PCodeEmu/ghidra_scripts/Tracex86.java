@@ -15,6 +15,7 @@
  */
 //@category Emulation
 
+import db.Transaction;
 import ghidra.app.plugin.core.debug.service.breakpoint.DebuggerLogicalBreakpointServicePlugin;
 import ghidra.app.plugin.core.debug.service.emulation.*;
 import ghidra.app.plugin.core.debug.service.emulation.data.PcodeDebuggerAccess;
@@ -35,7 +36,6 @@ import ghidra.trace.model.thread.TraceThread;
 import ghidra.trace.model.time.TraceSnapshot;
 import ghidra.trace.model.time.schedule.TraceSchedule;
 import ghidra.util.NumericUtilities;
-import ghidra.util.database.UndoableTransaction;
 
 import java.lang.invoke.MethodHandles;
 import java.util.Map;
@@ -77,6 +77,9 @@ public class Tracex86 extends GhidraScript {
 
 		CompilerSpec cspec = currentProgram.getCompilerSpec();
 		DBTrace trace = new DBTrace("TestTrace", cspec, this);
+		DBTraceThreadManager threadManager = trace.getThreadManager();
+		DBTraceTimeManager timeManager = trace.getTimeManager();
+
 		emuService.setEmulatorFactory(new BytesDebuggerPcodeEmulatorFactory() {
 			@Override
 			public DebuggerPcodeMachine<?> create(PcodeDebuggerAccess access) {
@@ -90,27 +93,20 @@ public class Tracex86 extends GhidraScript {
 				return emu;
 			}
 		});
-		DBTraceThreadManager threadManager = trace.getThreadManager();
-		DBTraceTimeManager timeManager = trace.getTimeManager();
 
 		TraceThread thread;
-		try (UndoableTransaction tid = UndoableTransaction.
-				start(trace, "Initialize test trace")) {
-
+		try (Transaction tid = trace.openTransaction("Initialize test trace")) {
 			thread = threadManager.createThread("Test trace", 0);
 			PcodeExecutor<byte[]> exec =
 					TraceSleighUtils.buildByteExecutor(trace, 0, thread, 0);
 			PcodeProgram initProg = SleighProgramCompiler.compileProgram(
-					lang, "test", lang.getProgramCounter().getName() + " = 0x" + start + ";",
-					lib);
+					lang, "test", lang.getProgramCounter().getName() + " = 0x" + start + ";", lib);
 			exec.execute(initProg, lib);
 			TraceSnapshot initial = timeManager.createSnapshot("Emulation started at " + startAddr);
 			ProgramEmulationUtils.loadExecutable(initial, currentProgram);
-			tid.commit();
 		}
 
 		TraceSchedule schedule = TraceSchedule.parse("0:.t0-1");
-
 		traceManager.openTrace(trace);
 		traceManager.activateThread(thread);
 		traceManager.activateTime(schedule);

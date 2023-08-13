@@ -19,6 +19,7 @@ import ghidra.app.decompiler.DecompInterface;
 import ghidra.app.decompiler.DecompileOptions;
 import ghidra.app.decompiler.DecompileResults;
 import ghidra.app.script.GhidraScript;
+import ghidra.pcode.utils.PcodeUtils;
 import ghidra.program.model.listing.Function;
 
 import java.util.ArrayList;
@@ -29,16 +30,7 @@ public class GenerateMacros extends GhidraScript {
 
 	@Override
 	public void run() throws Exception {
-		DecompileOptions options = new DecompileOptions();
-		DecompInterface ifc = new DecompInterface();
-		ifc.setOptions(options);
-		ifc.setSimplificationStyle("decompile");
-		if (!ifc.openProgram(this.currentProgram)) {
-			return;
-		}
-		Function func = currentProgram.getListing().getFunctionContaining(currentAddress);
-		DecompileResults dr = ifc.decompileFunction(func, options.getDefaultTimeout(), monitor);
-		String str = dr.getDecompiledFunction().getC();
+		String str = PcodeUtils.getDecompiledC(currentProgram, currentAddress, monitor);
 		processCOPY(str);
 		processTOARR(str);
 		processCONCAT(str);
