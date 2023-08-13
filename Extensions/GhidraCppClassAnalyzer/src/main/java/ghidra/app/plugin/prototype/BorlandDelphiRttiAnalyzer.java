@@ -1,6 +1,7 @@
 package ghidra.app.plugin.prototype;
 
 import ghidra.app.cmd.data.rtti.borland.delphi.datatype.*;
+import ghidra.app.cmd.data.rtti.borland.delphi.util.*;
 import ghidra.app.services.*;
 import ghidra.app.util.importer.MessageLog;
 import ghidra.pcode.utils.Utils;
@@ -10,7 +11,6 @@ import ghidra.program.model.listing.*;
 import ghidra.program.model.mem.*;
 import ghidra.program.model.reloc.*;
 import ghidra.program.model.symbol.*;
-import ghidra.program.model.util.CodeUnitInsertionException;
 import ghidra.util.InvalidNameException;
 import ghidra.util.bytesearch.*;
 import ghidra.util.exception.*;
@@ -29,16 +29,15 @@ public class BorlandDelphiRttiAnalyzer extends AbstractAnalyzer {
 	private AddressSetView set;
 	private TaskMonitor monitor;
 	private MessageLog log;
-	private Listing listing;
 	private Memory memory;
 	private boolean bigEndian;
 	private ProgramBasedDataTypeManager dataTypeManager;
 	private CategoryPath systemPath;
-	private EnumDataType TTypeKindDT;
 	private StructureDataType TTypeInfoDT;
 	private PascalString255DataType StringDT;
 	private PointerDataType PointerDT;
 	private StructureDataType TVmtDT;
+	private long TVmtSize;
 	private SymbolTable symbolTable;
 	RelocationTable relocationTable;
 	List<Relocation> relocations;
@@ -61,11 +60,11 @@ public class BorlandDelphiRttiAnalyzer extends AbstractAnalyzer {
 		if (!init(program, set, monitor, log)) return false;
 		Address vmtAddress = getTObjectVmt();
 		if (vmtAddress == null) return false;
-		Address selfPtr = readPointer(vmtAddress);
+		Address selfPtr = MemoryUtil.readPointer(vmtAddress, program);
 		if (selfPtr == null) return false;
-		long diff = selfPtr.subtract(vmtAddress);
-		TVmtDT = TVmt.getDataType(systemPath, dataTypeManager, diff);
-		putVirtualMethodTable(vmtAddress);
+		TVmtSize = selfPtr.subtract(vmtAddress);
+		TVmtDT = TVmt.getDataType(TVmtSize, systemPath, dataTypeManager);
+		TVmt.putObject(vmtAddress, TVmtSize, systemPath, program);
 		createLabel(vmtAddress, "VMT_" + TVmt.getVMTTypeName(vmtAddress, program));
 		pending.add(vmtAddress);
 		while (!pending.isEmpty()) {
@@ -84,7 +83,6 @@ public class BorlandDelphiRttiAnalyzer extends AbstractAnalyzer {
 		this.monitor = monitor;
 		this.log = log;
 
-		listing = program.getListing();
 		memory = program.getMemory();
 		bigEndian = program.getLanguage().isBigEndian();
 		dataTypeManager = program.getDataTypeManager();
@@ -94,12 +92,11 @@ public class BorlandDelphiRttiAnalyzer extends AbstractAnalyzer {
 			return false;
 		}
 		StringDT = PascalString255DataType.dataType;
-		String compilerVersion = getCompilerVersion();
+		/*String compilerVersion = getCompilerVersion();
 		if (compilerVersion == null) {
 			return false;
-		}
+		}*/
 
-		TTypeKindDT = TTypeKind.getDataType(systemPath, dataTypeManager);
 		TTypeInfoDT = TTypeInfo.getDataType(systemPath, dataTypeManager);
 		PointerDT = PointerDataType.dataType;
 
@@ -120,7 +117,7 @@ public class BorlandDelphiRttiAnalyzer extends AbstractAnalyzer {
 		MemoryBlock rdata = memory.getBlock(".rdata");
 		if (rdata == null) return null;
 		Address address = rdata.getStart();
-		String string = readCString(address);
+		String string = MemoryUtil.readCString(address, program);
 		if (string == null) return null;
 		String searchString = "compiler version";
 		if (!string.contains(searchString)) return null;
@@ -128,33 +125,19 @@ public class BorlandDelphiRttiAnalyzer extends AbstractAnalyzer {
 		if (!versionString.contains("(")) return null;
 		versionString = versionString.substring(0, versionString.indexOf("("));
 		versionString = versionString.replace(" ", ""); // Delete extra space chars
-		Data data = deleteCreateData(address, TerminatedStringDataType.dataType);
+		Data data = ListingUtils.deleteCreateData(address, TerminatedStringDataType.dataType, program);
 		return versionString;
-	}
-
-	private void putTTypeInfo(Address address) {
-		deleteCreateData(address, TTypeInfoDT);
-		deleteCreateData(address.add(TTypeInfoDT.getLength()), PascalString255DataType.dataType);
-	}
-
-	private void putVirtualMethodTable(Address address) {
-		deleteCreateData(address, TVmtDT);
-		long pointerSize = PointerDT.getLength();
-		Address vmtTypeInfo = readPointer(address.add(pointerSize * 4));
-		putTTypeInfo(vmtTypeInfo);
-		Address vmtClassName = readPointer(address.add(pointerSize * 8));
-		deleteCreateData(vmtClassName, StringDT);
 	}
 
 	private List<Address> getChildren(Address parent) {
 		List<Address> children = new ArrayList<>();
 		for (Relocation reloc : relocations) {
 			Address relocAddr = reloc.getAddress();
-			if (parent.equals(readPointer(relocAddr))) {
+			if (parent.equals(MemoryUtil.readPointer(relocAddr, program))) {
 				Address child = relocAddr.subtract(40);
-				if (TVmt.isValid(child, relocations, program)) {
+				if (TVmt.isValid(child, TVmtSize, relocations, program)) {
 					children.add(child);
-					putVirtualMethodTable(child);
+					TVmt.putObject(child, TVmtSize, systemPath, program);
 					createLabel(child, "VMT_" + TVmt.getVMTTypeName(child, program));
 				}
 			}
@@ -213,37 +196,8 @@ public class BorlandDelphiRttiAnalyzer extends AbstractAnalyzer {
 			return null;
 		}
 		Address result = found.get(0);
-		putTTypeInfo(result);
+		TTypeInfo.putObject(result, systemPath, program);
 		return result;
-	}
-
-	private Data deleteCreateData(Address address, DataType dataType) {
-		if (address == null) return null;
-		if (address.getOffset() == 0) return null;
-		Data data = listing.getDataAt(address);
-		if (dataType == null) {
-			if (data != null) {
-				listing.clearCodeUnits(address, address, false);
-			}
-			return null;
-		}
-		if (data != null) {
-			if (data.getDataType().equals(dataType)) return data;
-			if (data.getDataType().isEquivalent(dataType)) return data;
-		}
-		Address clearAddr = address;
-		while (true) {
-			try {
-				data = listing.createData(address, dataType);
-				return data; // No further clearing is required so return immediately
-			}
-			catch (CodeUnitInsertionException e) {}
-			data = listing.getDataAt(clearAddr);
-			if (data.isDefined()) { // May encounter no data at this position so a check is required
-				listing.clearCodeUnits(clearAddr, clearAddr, false);
-			}
-			clearAddr = clearAddr.add(1); // Displace clearing address 1 byte forward and make a next try
-		}
 	}
 
 	private void createLabel(Address address, String name) {
@@ -263,46 +217,6 @@ public class BorlandDelphiRttiAnalyzer extends AbstractAnalyzer {
 	private byte[] getBytes(Address address) {
 		int pointerSize = address.getAddressSpace().getPointerSize();
 		return Utils.longToBytes(address.getOffset(), pointerSize, bigEndian);
-	}
-
-	private byte[] readBytes(Address address, int size) throws MemoryAccessException {
-		byte[] bytes = new byte[size];
-		memory.getBytes(address, bytes);
-		return bytes;
-	}
-
-	private long readNumber(Address address, int size) throws MemoryAccessException {
-		byte[] bytes = readBytes(address, size);
-		return Utils.bytesToLong(bytes, size, bigEndian);
-	}
-
-	private Address readPointer(Address address) {
-		if (address == null) return null;
-		int size = address.getPointerSize();
-		try {
-			long offset = readNumber(address, size);
-			if (offset == 0) return null; // Assume null pointer is not mapped to any valid data
-			AddressSpace space = address.getAddressSpace();
-			return space.getAddress(offset); // Assume address space is the same
-		}
-		catch (MemoryAccessException | AddressOutOfBoundsException e) {
-			return null;
-		}
-	}
-
-	private String readCString(Address address) {
-		if (address == null) return null;
-		try {
-			StringBuilder str = new StringBuilder();
-			while (readNumber(address, 1) != 0) {
-				char c = (char) readNumber(address, 1);
-				address = address.add(1);
-				str.append(c);
-			}
-			return str.toString();
-		} catch (MemoryAccessException | NullPointerException e) {
-			return null;
-		}
 	}
 
 	private List<Address> findMatches(byte[] bytes, String searchName, DataType dataType) throws CancelledException {

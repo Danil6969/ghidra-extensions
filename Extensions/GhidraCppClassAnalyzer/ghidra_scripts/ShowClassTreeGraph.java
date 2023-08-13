@@ -8,6 +8,7 @@ import ghidra.app.services.GraphDisplayBroker;
 import ghidra.framework.plugintool.PluginTool;
 import ghidra.service.graph.AttributedGraph;
 import ghidra.service.graph.AttributedVertex;
+import ghidra.service.graph.EmptyGraphType;
 import ghidra.service.graph.GraphDisplay;
 
 import java.util.*;
@@ -29,7 +30,7 @@ public class ShowClassTreeGraph extends CppClassAnalyzerGhidraScript {
 		GraphDisplay display = service.getDefaultGraphDisplay(false, monitor);
 		Map<Long, AttributedVertex> vertices = new HashMap<>();
 
-		AttributedGraph graph = new AttributedGraph();
+		AttributedGraph graph = new AttributedGraph("Class tree graph", new EmptyGraphType());
 		AttributedVertex typeVertex = graph.addVertex(type.getFullName());
 		vertices.put(type.getClassDataTypeId(), typeVertex);
 
