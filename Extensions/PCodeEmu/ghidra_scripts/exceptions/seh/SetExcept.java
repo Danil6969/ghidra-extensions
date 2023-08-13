@@ -1,4 +1,4 @@
-package exceptions.seh;/* ###
+/* ###
  * IP: GHIDRA
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,6 +14,7 @@ package exceptions.seh;/* ###
  * limitations under the License.
  */
 //@category Exceptions
+package exceptions.seh;
 
 import ghidra.pcode.utils.PcodeUtils;
 import ghidra.app.plugin.core.clear.ClearCmd;
