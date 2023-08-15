@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import ghidra.app.cmd.data.rtti.gcc.UnresolvedClassTypeInfoException;
 import ghidra.app.plugin.core.datamgr.archive.ProjectArchive;
+import ghidra.framework.model.DomainObject;
 import ghidra.framework.model.DomainObjectClosedListener;
 import ghidra.framework.plugintool.PluginTool;
 import ghidra.program.model.listing.Program;
@@ -205,7 +206,7 @@ public final class HeadlessClassTypeInfoManagerService implements ClassTypeInfoM
 		}
 
 		@Override
-		public void domainObjectClosed() {
+		public void domainObjectClosed(DomainObject dobj) {
 			programClosed(program);
 		}
 	}
