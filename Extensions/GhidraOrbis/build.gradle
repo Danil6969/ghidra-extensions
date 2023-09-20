@@ -1,0 +1,10 @@
+apply from: "$rootProject.projectDir/gradle/distributableGhidraExtension.gradle"
+apply from: "$rootProject.projectDir/gradle/javaProject.gradle"
+//apply from: "$rootProject.projectDir/gradle/javadoc.gradle"
+//apply plugin: 'java'
+apply plugin: 'eclipse'
+eclipse.project.name = 'Ghidra Orbis'
+
+dependencies {
+    api project(':GhidraCppClassAnalyzer')
+}
