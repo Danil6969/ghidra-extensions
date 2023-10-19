@@ -145,7 +145,10 @@ public final class GnuUtils {
 	public static boolean isFunctionPointer(Program program, Address address) {
 		RelocationTable table = program.getRelocationTable();
 		if (table.isRelocatable()) {
-			Relocation reloc = table.getRelocations(address).get(0);
+			Relocation reloc = null;
+			if (!table.getRelocations(address).isEmpty()) {
+				reloc = table.getRelocations(address).get(0);
+			}
 			if (reloc != null) {
 				String name = reloc.getSymbolName();
 				if (name != null) {
