@@ -196,7 +196,10 @@ public class TypeInfoUtils {
 	 */
 	public static String getIDString(Program program, Address address) {
 		RelocationTable table = program.getRelocationTable();
-		Relocation reloc = table.getRelocations(address).get(0);
+		Relocation reloc = null;
+		if (!table.getRelocations(address).isEmpty()) {
+			reloc = table.getRelocations(address).get(0);
+		}
 		if (reloc != null && reloc.getSymbolName() != null) {
 			if (reloc.getSymbolName().startsWith(VtableModel.MANGLED_PREFIX)) {
 				return reloc.getSymbolName().substring(VtableModel.MANGLED_PREFIX.length());
