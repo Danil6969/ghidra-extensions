@@ -131,6 +131,9 @@ public abstract class AbstractRttiRecordWorker<T1 extends ClassTypeInfoDB,
 
 	@Override
 	public final T1 resolve(ClassTypeInfo type) {
+		if (type == null) {
+			return null;
+		}
 		long key = getTypeKey(type);
 		if (key != INVALID_KEY) {
 			return getType(key);
