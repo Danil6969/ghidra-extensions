@@ -342,6 +342,9 @@ public final class GnuUtils {
 	public static boolean isExternal(Program program, Address address) {
 		Memory mem = program.getMemory();
 		MemoryBlock block = mem.getBlock(address);
+		if (block == null) {
+			return false; // Not in any block at all
+		}
 		return block.getName().equals(MemoryBlock.EXTERNAL_BLOCK_NAME);
 	}
 
