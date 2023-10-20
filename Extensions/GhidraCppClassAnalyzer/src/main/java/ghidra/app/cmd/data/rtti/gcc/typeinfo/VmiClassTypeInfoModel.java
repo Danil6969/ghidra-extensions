@@ -150,7 +150,9 @@ public final class VmiClassTypeInfoModel extends AbstractClassTypeInfoModel {
 			if (base.isVirtual()) {
 				result.add(parent);
 			}
-			result.addAll(parent.getVirtualParents());
+			if (parent != null) {
+				result.addAll(parent.getVirtualParents());
+			}
 		}
 		return result;
 	}
