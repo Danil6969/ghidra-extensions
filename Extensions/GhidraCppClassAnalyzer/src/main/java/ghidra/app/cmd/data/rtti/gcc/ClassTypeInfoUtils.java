@@ -467,7 +467,12 @@ public class ClassTypeInfoUtils {
 				return doGetMaxVtableCount(type);
 			}
 		}
-		return type.getVirtualParents().size()+1;
+		try {
+			return type.getVirtualParents().size()+1;
+		}
+		catch (NullPointerException e) {
+			return 1;
+		}
 	}
 
 	private static int doGetMaxVtableCount(ClassTypeInfo type) {
