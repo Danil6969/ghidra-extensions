@@ -268,31 +268,42 @@ public class GnuClassTypeInfoDB extends AbstractClassTypeInfoDB {
 
 	@Override
 	protected void fillModelData(ClassTypeInfo type, ClassTypeInfoRecord record) {
-		if (type.hasParent()) {
-			virtualBaseKeys = type.getVirtualParents()
-				.stream()
-				.map(manager::resolve)
-				.mapToLong(DatabaseObject::getKey)
-				.toArray();
-		} else {
+		virtualBaseKeys = new long[0];
+		try {
+			if (type.hasParent()) {
+				Set<ClassTypeInfo> virtualParents = type.getVirtualParents();
+				if (virtualParents != null) {
+					virtualBaseKeys = virtualParents
+						.stream()
+						.map(manager::resolve)
+						.mapToLong(DatabaseObject::getKey)
+						.toArray();
+				}
+			}
+		}
+		catch (NullPointerException e) {
 			virtualBaseKeys = new long[0];
 		}
-		if (type instanceof VmiClassTypeInfoModel) {
-			VmiClassTypeInfoModel vmi = (VmiClassTypeInfoModel) type;
-			nonVirtualBaseKeys =
-				Arrays.stream(vmi.getBases())
-					.filter(Predicate.not(BaseClassTypeInfoModel::isVirtual))
-					.map(BaseClassTypeInfoModel::getClassModel)
-					.map(manager::resolve)
-					.mapToLong(DatabaseObject::getKey)
-					.toArray();
-		} else if (type.hasParent()) {
-			nonVirtualBaseKeys =
-				Arrays.stream(type.getParentModels())
-					.map(manager::resolve)
-					.mapToLong(DatabaseObject::getKey)
-					.toArray();
-		} else {
+		nonVirtualBaseKeys = new long[0];
+		try {
+			if (type instanceof VmiClassTypeInfoModel) {
+				VmiClassTypeInfoModel vmi = (VmiClassTypeInfoModel) type;
+				nonVirtualBaseKeys =
+					Arrays.stream(vmi.getBases())
+						.filter(Predicate.not(BaseClassTypeInfoModel::isVirtual))
+						.map(BaseClassTypeInfoModel::getClassModel)
+						.map(manager::resolve)
+						.mapToLong(DatabaseObject::getKey)
+						.toArray();
+			} else if (type.hasParent()) {
+				nonVirtualBaseKeys =
+					Arrays.stream(type.getParentModels())
+						.map(manager::resolve)
+						.mapToLong(DatabaseObject::getKey)
+						.toArray();
+			}
+		}
+		catch (NullPointerException e) {
 			nonVirtualBaseKeys = new long[0];
 		}
 		baseKeys = new long[0];
