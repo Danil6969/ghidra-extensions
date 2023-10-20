@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import ghidra.app.cmd.data.rtti.*;
+import ghidra.app.cmd.data.rtti.gcc.UnresolvedClassTypeInfoException;
 import ghidra.app.util.importer.MessageLog;
 import ghidra.program.database.ProgramDB;
 import ghidra.program.model.address.Address;
@@ -74,10 +75,13 @@ public final class ItaniumAbiClassTypeInfoManager extends ClassTypeInfoManagerDB
 			.findFirst()
 			.orElse(null);
 		if (mangled != null) {
-			ArchivedClassTypeInfo type = plugin.getExternalClassTypeInfo(program, mangled);
-			if (type != null) {
-				return resolve(type);
+			try {
+				ArchivedClassTypeInfo type = plugin.getExternalClassTypeInfo(program, mangled);
+				if (type != null) {
+					return resolve(type);
+				}
 			}
+			catch (UnresolvedClassTypeInfoException e) {}
 		}
 		return null;
 	}
