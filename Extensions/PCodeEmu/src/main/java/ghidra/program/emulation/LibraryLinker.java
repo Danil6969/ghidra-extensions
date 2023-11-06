@@ -19,6 +19,7 @@ import db.Transaction;
 import ghidra.app.plugin.core.debug.service.emulation.DebuggerPcodeMachine;
 import ghidra.app.plugin.core.debug.service.modules.DefaultModuleMapProposal;
 import ghidra.app.plugin.core.progmgr.ProgramManagerPlugin;
+import ghidra.app.services.DebuggerStaticMappingService;
 import ghidra.app.services.ProgramManager;
 import ghidra.framework.model.*;
 import ghidra.framework.plugintool.PluginTool;
@@ -52,6 +53,7 @@ public class LibraryLinker {
 	private final DebuggerPcodeMachine emu;
 	private boolean isBigEndian;
 	private ProgramManagerPlugin programManager;
+	private DebuggerStaticMappingService mappingService;
 	private TraceModuleManager moduleManager;
 	private TraceMemoryManager memoryManager;
 	private PcodeExecutorState<byte []> state;
@@ -81,6 +83,7 @@ public class LibraryLinker {
 	private void init() {
 		isBigEndian = currentProgram.getLanguage().isBigEndian();
 		programManager = PluginUtils.getOrAddPlugin(tool, ProgramManagerPlugin.class);
+		mappingService = tool.getService(DebuggerStaticMappingService.class);
 		moduleManager = trace.getModuleManager();
 		memoryManager = trace.getMemoryManager();
 		state = emu.getSharedState();
@@ -140,6 +143,14 @@ public class LibraryLinker {
 				long shift = module.getBase().getOffset() - program.getImageBase().getOffset();
 				MemoryBlock[] blocks = program.getMemory().getBlocks();
 				for (MemoryBlock block : blocks) {
+					// Shared regions which should be mapped manually
+					if (block.getName().equals("tdb")) {
+						memoryManager.getRegionContaining(0, block.getStart()).delete();
+						Object v = mappingService.getOpenMappedViews(program, new AddressSet(block.getStart())).values().toArray()[0];
+						mappingService.getOpenMappedViews(program, new AddressSet(block.getStart())).values();
+						continue;
+					}
+					if (block.getName().equals("FPUConsts")) continue;
 					Address start = block.getStart().add(shift);
 					moduleId = "Module[" + start + "-" + name + ":" + block.getName() + "]";
 					long blockSize = block.getSize();
@@ -174,10 +185,13 @@ public class LibraryLinker {
 	}
 
 	private AddressRange getRange(Program program, Collection<? extends TraceModule> modules) {
+		Address start = null;
+		long imageSize = 0;
 		try {
 			Address imageBase = program.getImageBase();
-			long imageSize = DefaultModuleMapProposal.DefaultModuleMapEntry.computeImageSize(program);
-			AddressRange range = new AddressRangeImpl(imageBase, imageSize);
+			imageSize = DefaultModuleMapProposal.DefaultModuleMapEntry.computeImageSize(program);
+			start = imageBase;
+			AddressRange range = new AddressRangeImpl(start, imageSize);
 			for (TraceModule conflictModule = getConflictModule(range, modules);
 				 conflictModule != null; conflictModule = getConflictModule(range, modules)) {
 				Address newAddress = conflictModule.getRange().getMaxAddress().add(1);
@@ -185,11 +199,15 @@ public class LibraryLinker {
 				if (remainder != 0) {
 					newAddress = newAddress.add(alignment - remainder);
 				}
-				range = new AddressRangeImpl(newAddress, imageSize);
+				start = newAddress;
+				range = new AddressRangeImpl(start, imageSize);
 			}
 			return range;
 		} catch (AddressOverflowException e) {
 			addError("Address overflow detected: " + program.getName());
+			if (start != null) {
+				addError("At " + start + " with size " + imageSize);
+			}
 			return null;
 		}
 	}

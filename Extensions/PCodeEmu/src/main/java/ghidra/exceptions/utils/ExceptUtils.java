@@ -13,13 +13,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package ghidra.pcode.utils;
+package ghidra.exceptions.utils;
 
 import ghidra.app.cmd.disassemble.DisassembleCommand;
 import ghidra.app.decompiler.*;
 import ghidra.app.plugin.core.clear.ClearCmd;
 import ghidra.program.model.address.Address;
-import ghidra.program.model.address.AddressSetView;
 import ghidra.program.model.lang.Register;
 import ghidra.program.model.listing.*;
 import ghidra.util.UndefinedFunction;
@@ -27,7 +26,80 @@ import ghidra.util.task.TaskMonitor;
 
 import java.math.BigInteger;
 
-public class PcodeUtils {
+public class ExceptUtils {
+	public static final int FLAG_CLEARED	= 0;
+	public static final int FLAG_TRY		= 1;
+	public static final int FLAG_CATCH		= 2;
+	public static final int FLAG_FINALLY	= 3;
+	public static final int FLAG_EXCEPT		= 4;
+	public static final int FLAG_ON			= 5;
+	public static final int FLAG_MIN		= FLAG_TRY;
+	public static final int FLAG_MAX		= FLAG_ON;
+
+	public static void setExceptFlags(Program program, TaskMonitor monitor, Address start, Address end) {
+		setFlags(program, monitor, start, end, FLAG_EXCEPT, 0);
+	}
+
+	public static void setCatchFlags(Program program, TaskMonitor monitor, Address start, Address end) {
+		setFlags(program, monitor, start, end, FLAG_CATCH, 0);
+		String str = getDecompiledC(program, start, monitor);
+		if (str == null) {
+			return;
+		}
+		if (!str.contains("!catch(")) {
+			return;
+		}
+		setFlags(program, monitor, start, end, FLAG_CATCH, 1);
+	}
+
+	public static void setFlags(Program program, TaskMonitor monitor, Address start, Address end, int flag, int variant) {
+		if (start == null) {
+			return;
+		}
+		if (flag < FLAG_MIN || flag > FLAG_MAX) { // Assume we are clearing if invalid flag was passed
+			BigInteger val1 = BigInteger.valueOf(0);
+			BigInteger val2 = BigInteger.valueOf(0);
+			BigInteger val3 = BigInteger.valueOf(0);
+			setFlags(program, monitor, start, val1, val2, val3);
+			return;
+		}
+
+		Listing lst = program.getListing();
+		long length = lst.getCodeUnitAt(start).getLength();
+
+		if (end == null || start.equals(end)) { // Assume end is next instruction
+			end = start.add(length - 1);
+		}
+
+		long offset = end.getOffset() - start.getOffset() - length + 1;
+
+		BigInteger val1 = BigInteger.valueOf(flag);
+		BigInteger val2 = BigInteger.valueOf(offset);
+		BigInteger val3 = BigInteger.valueOf(variant);
+		setFlags(program, monitor, start, val1, val2, val3);
+	}
+
+	/**
+	 * Sets values triple to define part of exception related code
+	 * @param program the program.
+	 * @param monitor the task monitor.
+	 * @param address the address at which context registers are set.
+	 * @param valFlag the value for register "exceptFlag".
+	 * @param valOffset the value for register "exceptOffset".
+	 * @param valVariant the value for register "exceptVariant".
+	 */
+	public static void setFlags(Program program, TaskMonitor monitor, Address address,
+								BigInteger valFlag, BigInteger valOffset, BigInteger valVariant) {
+		ProgramContext context = program.getProgramContext();
+		Register reg1 = context.getRegister("exceptFlag");
+		Register reg2 = context.getRegister("exceptOffset");
+		Register reg3 = context.getRegister("exceptVariant");
+
+		setContextRegister(program, monitor, reg1, valFlag, address);
+		setContextRegister(program, monitor, reg2, valOffset, address);
+		setContextRegister(program, monitor, reg3, valVariant, address);
+	}
+
 	/**
 	 * Waits until the given register recieves its correct value.
 	 * @param con the program context object.

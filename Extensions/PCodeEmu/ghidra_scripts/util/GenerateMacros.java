@@ -15,12 +15,8 @@
  */
 package util;
 
-import ghidra.app.decompiler.DecompInterface;
-import ghidra.app.decompiler.DecompileOptions;
-import ghidra.app.decompiler.DecompileResults;
 import ghidra.app.script.GhidraScript;
-import ghidra.pcode.utils.PcodeUtils;
-import ghidra.program.model.listing.Function;
+import ghidra.exceptions.utils.ExceptUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,7 +26,7 @@ public class GenerateMacros extends GhidraScript {
 
 	@Override
 	public void run() throws Exception {
-		String str = PcodeUtils.getDecompiledC(currentProgram, currentAddress, monitor);
+		String str = ExceptUtils.getDecompiledC(currentProgram, currentAddress, monitor);
 		processCOPY(str);
 		processTOARR(str);
 		processCONCAT(str);
