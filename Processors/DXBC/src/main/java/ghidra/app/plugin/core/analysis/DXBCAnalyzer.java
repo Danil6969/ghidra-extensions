@@ -59,7 +59,7 @@ public class DXBCAnalyzer extends ConstantPropagationAnalyzer {
 	@Override
 	public AddressSetView flowConstants(final Program program, Address flowStart, AddressSetView flowSet, final SymbolicPropogator symEval, final TaskMonitor monitor)
 			throws CancelledException {
-		ContextEvaluator eval = new ConstantPropagationContextEvaluator(trustWriteMemOption) {
+		ContextEvaluator eval = new ConstantPropagationContextEvaluator(monitor, trustWriteMemOption) {
 			@Override
 			public boolean evaluateContext(VarnodeContext context, Instruction instr) {
 				String mnemonic = instr.getMnemonicString();
