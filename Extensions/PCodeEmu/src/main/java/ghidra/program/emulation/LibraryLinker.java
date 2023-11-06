@@ -16,11 +16,11 @@
 package ghidra.program.emulation;
 
 import db.Transaction;
-import ghidra.app.plugin.core.debug.service.emulation.DebuggerPcodeMachine;
 import ghidra.app.plugin.core.debug.service.modules.DefaultModuleMapProposal;
 import ghidra.app.plugin.core.progmgr.ProgramManagerPlugin;
 import ghidra.app.services.DebuggerStaticMappingService;
 import ghidra.app.services.ProgramManager;
+import ghidra.debug.api.emulation.DebuggerPcodeMachine;
 import ghidra.framework.model.*;
 import ghidra.framework.plugintool.PluginTool;
 import ghidra.pcode.exec.PcodeExecutorState;

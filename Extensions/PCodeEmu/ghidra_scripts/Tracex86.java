@@ -18,11 +18,12 @@
 import db.Transaction;
 import ghidra.app.plugin.core.debug.service.breakpoint.DebuggerLogicalBreakpointServicePlugin;
 import ghidra.app.plugin.core.debug.service.emulation.*;
-import ghidra.app.plugin.core.debug.service.emulation.data.PcodeDebuggerAccess;
 import ghidra.app.plugin.core.debug.service.tracemgr.DebuggerTraceManagerServicePlugin;
 import ghidra.app.plugin.processors.sleigh.SleighLanguage;
 import ghidra.app.script.GhidraScript;
-import ghidra.app.services.LogicalBreakpoint;
+import ghidra.debug.api.breakpoint.LogicalBreakpoint;
+import ghidra.debug.api.emulation.DebuggerPcodeMachine;
+import ghidra.debug.api.emulation.PcodeDebuggerAccess;
 import ghidra.framework.plugintool.PluginTool;
 import ghidra.pcode.exec.*;
 import ghidra.pcode.exec.trace.TraceSleighUtils;
