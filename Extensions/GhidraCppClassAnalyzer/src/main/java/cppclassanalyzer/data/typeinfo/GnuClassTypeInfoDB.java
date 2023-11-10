@@ -253,6 +253,16 @@ public class GnuClassTypeInfoDB extends AbstractClassTypeInfoDB {
 
 	@Override
 	public Namespace getNamespace() {
+		int total = 0;
+		while (gc == null) {
+			int timeout = 2000;
+			int delay = 10;
+			if (total >= timeout) break;
+			try {
+				Thread.sleep(delay);
+				total += delay;
+			} catch (InterruptedException e) {}
+		}
 		return gc;
 	}
 

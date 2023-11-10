@@ -369,9 +369,8 @@ public class TypeInfoUtils {
 		if (ns.isGlobal()) {
 			path = "";
 		} else {
-			path = Namespace.DELIMITER+ns.getName(true);
+			path = CategoryPath.DELIMITER_STRING+ns.getName(true);
 		}
-		path = path.replaceAll(Namespace.DELIMITER, CategoryPath.DELIMITER_STRING);
 		return new CategoryPath(path);
 	}
 
