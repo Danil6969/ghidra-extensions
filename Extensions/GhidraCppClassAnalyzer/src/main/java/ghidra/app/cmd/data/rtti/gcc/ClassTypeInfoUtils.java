@@ -357,9 +357,10 @@ public class ClassTypeInfoUtils {
 	 * Gets the DataType representation of the _vptr for the specified ClassTypeInfo.
 	 * @param program the program containing the ClassTypeInfo
 	 * @param type the ClassTypeInfo
+	 * @param uselast true if compiler uses last vtable as its own (MSVC)
 	 * @return the ClassTypeInfo's _vptr DataType
 	 */
-	public static DataType getVptrDataType(Program program, ClassTypeInfo type) {
+	public static DataType getVptrDataType(Program program, ClassTypeInfo type, boolean uselast) {
 		try {
 			Vtable vtable = type.getVtable();
 			CategoryPath path =
@@ -367,7 +368,10 @@ public class ClassTypeInfoUtils {
 			DataTypeManager dtm = program.getDataTypeManager();
 			Structure struct = new StructureDataType(path, type.getName() + "::" + VtableModel.SYMBOL_NAME + "_t", 0, dtm);
 			Function[][] functionTable = vtable.getFunctionTables();
-			int i = functionTable.length - 1;
+			int i = 0;
+			if (uselast) {
+				i = functionTable.length - 1;
+			}
 			if (functionTable.length > 0 && functionTable[i].length > 0) {
 				for (Function function : functionTable[i]) {
 					if (function != null) {
@@ -409,8 +413,8 @@ public class ClassTypeInfoUtils {
 	 * @deprecated the path parameter is now ignored
 	 */
 	@Deprecated(forRemoval=true)
-	public static DataType getVptrDataType(Program program, ClassTypeInfo type, CategoryPath path) {
-		return getVptrDataType(program, type);
+	public static DataType getVptrDataType(Program program, ClassTypeInfo type, CategoryPath path, boolean uselast) {
+		return getVptrDataType(program, type, uselast);
 	}
 
 	public static Map<ClassTypeInfo, Integer> getBaseOffsets(ClassTypeInfo type) {

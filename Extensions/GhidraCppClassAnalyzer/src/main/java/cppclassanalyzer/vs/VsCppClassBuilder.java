@@ -40,7 +40,7 @@ public class VsCppClassBuilder extends AbstractCppClassBuilder {
 	private void addVfptr(Structure struct, int offset) {
 		ClassTypeInfo type = getType();
 		Program program = getProgram();
-		DataType vfptr = ClassTypeInfoUtils.getVptrDataType(program, type);
+		DataType vfptr = ClassTypeInfoUtils.getVptrDataType(program, type, true);
 		DataTypeComponent comp = struct.getComponentContaining(offset);
 		if (comp == null || isUndefined(comp.getDataType())) {
 			replaceComponent(struct, vfptr, VFPTR, offset);

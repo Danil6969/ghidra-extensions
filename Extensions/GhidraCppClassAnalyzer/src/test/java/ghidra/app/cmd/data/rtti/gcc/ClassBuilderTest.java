@@ -90,7 +90,7 @@ public final class ClassBuilderTest extends X86GccRttiTest {
 				continue;
 			}
 			ClassTypeInfo type = vtable.getTypeInfo();
-			Pointer ptr = (Pointer) ClassTypeInfoUtils.getVptrDataType(program, type);
+			Pointer ptr = (Pointer) ClassTypeInfoUtils.getVptrDataType(program, type, false);
 			Structure struct = (Structure) ptr.getDataType();
 			assert struct.getNumComponents() > 0 : struct.getDataTypePath().toString() + " is empty";
 		}
