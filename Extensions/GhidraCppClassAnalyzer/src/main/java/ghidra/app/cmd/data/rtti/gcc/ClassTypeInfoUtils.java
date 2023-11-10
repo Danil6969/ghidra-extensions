@@ -194,7 +194,7 @@ public class ClassTypeInfoUtils {
 			}
 		}
 		Namespace ns = type.getNamespace().getParentNamespace();
-		if (ns != null && !ns.isGlobal() && ns.getName().equals(path.getName())) {
+		if (ns != null && !ns.isGlobal() && ns.getName(true).equals(path.getName())) {
 			// assume VariableUtilities found the type from debug info
 			return (Structure) thiscallStruct;
 		}
