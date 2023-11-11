@@ -30,7 +30,7 @@ public class GccCppClassBuilder extends AbstractCppClassBuilder {
 		if (!Vtable.isValid(getType().getVtable())) {
 			return;
 		}
-		DataType vptr = ClassTypeInfoUtils.getVptrDataType(getProgram(), getType(), false);
+		DataType vptr = ClassTypeInfoUtils.getVptrDataType(getProgram(), getType(), ClassTypeInfoUtils.VtableMode.GCC);
 		DataTypeComponent comp = struct.getComponentAt(0);
 		if (comp == null || isUndefined(comp.getDataType())) {
 			if (vptr != null) {
