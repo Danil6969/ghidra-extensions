@@ -414,7 +414,14 @@ public class ClassTypeInfoUtils {
 		try {
 			String name = dataType.getName();
 			DemangledObject demangled = DemanglerUtil.demangle(name);
-			if (demangled != null) {
+			if (demangled == null) {
+				String path = dataType.getDataTypePath().toString();
+				if (path.charAt(0) == '/') {
+					path = path.substring(1);
+				}
+				name = path.replaceAll("/", "::");
+			}
+			else {
 				name = demangled.getNamespace() + "::" + demangled.getName();
 			}
 			name = name + "_t";
@@ -447,8 +454,8 @@ public class ClassTypeInfoUtils {
 							continue;
 						}
 						DataType dt = new FunctionDefinitionDataType(function, false);
-						processFunctionDefinitionName(dt);
 						dt.setCategoryPath(path);
+						processFunctionDefinitionName(dt);
 						if (dtm.contains(dt)) {
 							dt = dtm.getDataType(dt.getDataTypePath());
 						} else {
