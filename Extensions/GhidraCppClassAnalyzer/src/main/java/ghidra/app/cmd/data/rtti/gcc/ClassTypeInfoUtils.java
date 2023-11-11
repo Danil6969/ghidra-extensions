@@ -8,7 +8,10 @@ import cppclassanalyzer.data.ProgramClassTypeInfoManager;
 import cppclassanalyzer.data.typeinfo.GnuClassTypeInfoDB;
 import cppclassanalyzer.data.typeinfo.AbstractClassTypeInfoDB.TypeId;
 import cppclassanalyzer.utils.CppClassAnalyzerUtils;
+import ghidra.app.util.demangler.DemangledObject;
+import ghidra.app.util.demangler.DemanglerUtil;
 import ghidra.docking.settings.Settings;
+import ghidra.util.InvalidNameException;
 import util.CollectionUtils;
 
 import ghidra.app.cmd.data.rtti.ClassTypeInfo;
@@ -407,6 +410,18 @@ public class ClassTypeInfoUtils {
 		return 0; // Zeroth table is also default if mode isn't supported
 	}
 
+	public static void processFunctionDefinitionName(DataType dataType) {
+		try {
+			String name = dataType.getName();
+			DemangledObject demangled = DemanglerUtil.demangle(name);
+			if (demangled != null) {
+				name = demangled.getNamespace() + "::" + demangled.getName();
+			}
+			name = name + "_t";
+			dataType.setName(name);
+		} catch (InvalidNameException | DuplicateNameException e) {}
+	}
+
 	/**
 	 * Gets the DataType representation of the _vptr for the specified ClassTypeInfo.
 	 * @param program the program containing the ClassTypeInfo
@@ -432,6 +447,7 @@ public class ClassTypeInfoUtils {
 							continue;
 						}
 						DataType dt = new FunctionDefinitionDataType(function, false);
+						processFunctionDefinitionName(dt);
 						dt.setCategoryPath(path);
 						if (dtm.contains(dt)) {
 							dt = dtm.getDataType(dt.getDataTypePath());
