@@ -8,6 +8,7 @@ import cppclassanalyzer.data.ProgramClassTypeInfoManager;
 import cppclassanalyzer.data.typeinfo.GnuClassTypeInfoDB;
 import cppclassanalyzer.data.typeinfo.AbstractClassTypeInfoDB.TypeId;
 import cppclassanalyzer.utils.CppClassAnalyzerUtils;
+import ghidra.docking.settings.Settings;
 import util.CollectionUtils;
 
 import ghidra.app.cmd.data.rtti.ClassTypeInfo;
@@ -34,6 +35,9 @@ import ghidra.util.task.TaskMonitor;
 import static ghidra.app.cmd.data.rtti.GnuVtable.PURE_VIRTUAL_FUNCTION_NAME;
 
 public class ClassTypeInfoUtils {
+	public enum VtableMode {
+		VS, GCC;
+	}
 
 	private static final String PLACEHOLDER_DESCRIPTION = "PlaceHolder Class Structure";
 	private static final String MISSING = "Missing";
@@ -358,13 +362,59 @@ public class ClassTypeInfoUtils {
 	}
 
 	/**
+	 * Gets index which corresponds to base (zero offset) function table.
+	 * @param program the program containing the vtable
+	 * @param vtable the vtable
+	 * @param mode determines how the table is chosen
+	 * @return the index for function table
+	 */
+	private static int getTableIndex(Program program, Vtable vtable, VtableMode mode) {
+		Function[][] functionTable = vtable.getFunctionTables();
+		if (functionTable.length == 0) {
+			return 0; // No function tables, return with 0 early
+		}
+		if (functionTable.length == 1) {
+			return 0; // Single function table, return with 0 early
+		}
+
+		if (mode == VtableMode.VS) {
+			return functionTable.length - 1;
+		}
+
+		if (mode == VtableMode.GCC) {
+			Memory mem = program.getMemory();
+			DataType ptrDiff = GnuUtils.getPtrDiff_t(program.getDataTypeManager());
+			int diffLen = ptrDiff.getLength();
+			Settings settings = ptrDiff.getDefaultSettings();
+			Address[] addresses = vtable.getTableAddresses();
+			for (int i = 0; i < addresses.length; i++) {
+				Address addr = addresses[i];
+				int size = addr.getPointerSize();
+				Address diffAddr = addr.subtract(size * 2);
+				MemBuffer buf = new DumbMemBufferImpl(mem, diffAddr);
+				Object value = ptrDiff.getValue(buf, settings, diffLen);
+				if (!(value instanceof Scalar)) {
+					throw new AssertException("Expected scalar datatype");
+				}
+				Scalar scalarValue = (Scalar) value;
+				if (scalarValue.getValue() == 0) {
+					return i;
+				}
+			}
+			return 0; // Use default if failed to find zero diff table
+		}
+
+		return 0; // Zeroth table is also default if mode isn't supported
+	}
+
+	/**
 	 * Gets the DataType representation of the _vptr for the specified ClassTypeInfo.
 	 * @param program the program containing the ClassTypeInfo
 	 * @param type the ClassTypeInfo
-	 * @param uselast true if compiler uses last vtable as its own (MSVC)
+	 * @param mode which vtable to pick
 	 * @return the ClassTypeInfo's _vptr DataType
 	 */
-	public static DataType getVptrDataType(Program program, ClassTypeInfo type, boolean uselast) {
+	public static DataType getVptrDataType(Program program, ClassTypeInfo type, VtableMode mode) {
 		try {
 			Vtable vtable = type.getVtable();
 			CategoryPath path =
@@ -372,10 +422,7 @@ public class ClassTypeInfoUtils {
 			DataTypeManager dtm = program.getDataTypeManager();
 			Structure struct = new StructureDataType(path, type.getName() + "::" + VtableModel.SYMBOL_NAME + "_t", 0, dtm);
 			Function[][] functionTable = vtable.getFunctionTables();
-			int i = 0;
-			if (uselast) {
-				i = functionTable.length - 1;
-			}
+			int i = getTableIndex(program, vtable, mode);
 			if (functionTable.length > 0 && functionTable[i].length > 0) {
 				for (Function function : functionTable[i]) {
 					if (function != null) {
@@ -398,9 +445,6 @@ public class ClassTypeInfoUtils {
 					}
 				}
 			}
-			// Who ever said this???
-			//struct.setPackingEnabled(true);
-			//struct.setToMachineAligned();
 			struct = (Structure) dtm.resolve(struct, DataTypeConflictHandler.REPLACE_HANDLER);
 			return dtm.getPointer(struct);
 		} catch (DuplicateNameException e) {
@@ -417,8 +461,8 @@ public class ClassTypeInfoUtils {
 	 * @deprecated the path parameter is now ignored
 	 */
 	@Deprecated(forRemoval=true)
-	public static DataType getVptrDataType(Program program, ClassTypeInfo type, CategoryPath path, boolean uselast) {
-		return getVptrDataType(program, type, uselast);
+	public static DataType getVptrDataType(Program program, ClassTypeInfo type, CategoryPath path, VtableMode mode) {
+		return getVptrDataType(program, type, mode);
 	}
 
 	public static Map<ClassTypeInfo, Integer> getBaseOffsets(ClassTypeInfo type) {
