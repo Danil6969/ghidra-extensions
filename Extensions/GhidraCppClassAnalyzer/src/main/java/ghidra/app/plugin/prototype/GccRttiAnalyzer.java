@@ -329,7 +329,11 @@ public class GccRttiAnalyzer extends AbstractAnalyzer {
 			try {
 				createVtable((GnuVtable) vtable);
 			} catch (Exception e) {
-				log.appendMsg("Unable to create vtable for "+vtable.getTypeInfo().getFullName());
+				String message = "Unable to create vtable for ";
+				message += vtable.getTypeInfo().getFullName() + "\n";
+				message += e.getMessage() + "\n";
+				message += e.getStackTrace();
+				log.appendMsg(message);
 			}
 			monitor.incrementProgress(1);
 		}
