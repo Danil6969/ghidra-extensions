@@ -112,10 +112,14 @@ public class ClassTypeInfoUtils {
 		if (data == null) {
 			return false;
 		}
-		if (data.getDataType() instanceof Pointer) {
+		DataType dataType = data.getDataType();
+		if (dataType instanceof Pointer) {
 			return false;
 		}
-		if (data.getDataType() instanceof DefaultDataType) {
+		if (dataType instanceof DefaultDataType) {
+			return false;
+		}
+		if (Undefined.isUndefinedArray(dataType)) {
 			return false;
 		}
 		return true;
