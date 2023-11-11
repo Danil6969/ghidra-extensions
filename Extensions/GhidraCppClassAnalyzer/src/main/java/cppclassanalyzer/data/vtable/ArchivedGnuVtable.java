@@ -11,6 +11,7 @@ import java.util.stream.Stream;
 import ghidra.app.cmd.data.rtti.ClassTypeInfo;
 import ghidra.app.cmd.data.rtti.GnuVtable;
 import ghidra.app.cmd.data.rtti.GnuVtable.VtablePrefix;
+import ghidra.app.cmd.data.rtti.gcc.ClassTypeInfoUtils;
 import ghidra.app.cmd.data.rtti.gcc.VtableUtils;
 import ghidra.program.database.DatabaseObject;
 
@@ -169,6 +170,7 @@ public class ArchivedGnuVtable extends DatabaseObject implements ArchivedVtable 
 		private FunctionDefinition resolve(FunctionSignature sig) {
 			DataTypeManager dtm = manager.getDataTypeManager();
 			FunctionDefinition def = new FunctionDefinitionDataType(sig, dtm);
+			ClassTypeInfoUtils.processFunctionDefinitionName(def);
 			return (FunctionDefinition) dtm.resolve(def, DataTypeConflictHandler.KEEP_HANDLER);
 		}
 
