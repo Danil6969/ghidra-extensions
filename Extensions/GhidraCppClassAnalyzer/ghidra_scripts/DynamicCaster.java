@@ -33,6 +33,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import ghidra.app.cmd.data.rtti.ClassTypeInfo;
+import ghidra.app.cmd.data.rtti.gcc.ClassTypeInfoUtils;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.data.*;
 import ghidra.program.model.listing.Function;
@@ -156,8 +157,9 @@ public class DynamicCaster extends CppClassAnalyzerGhidraScript {
 	}
 
 	private FunctionDefinition getFunctionSignature(ClassTypeInfo src, ClassTypeInfo dest,
-			Function function)throws Exception {
+			Function function) throws Exception {
 		FunctionDefinition def = new FunctionDefinitionDataType(sig);
+		ClassTypeInfoUtils.processFunctionDefinitionName(def);
 		ParameterDefinition[] params = def.getArguments();
 		params[0] = getParameter(src.getClassDataType());
 		params[1] = getParameter(src.getDataType());
