@@ -430,6 +430,51 @@ public class ClassTypeInfoUtils {
 	}
 
 	/**
+	 * Checks if function is pure by its name.
+	 * @param function the function to check
+	 * @return true if function is pure
+	 */
+	private static boolean isPureFunction(Function function) {
+		String name = function.getName();
+		if (name.equals("__cxa_pure_virtual")) return true;
+		if (name.equals("__purecall")) return true;
+		return false;
+	}
+
+	private static String getUniqueName(Function function, Function[] table, Structure structure) {
+		String name = function.getName();
+		DataTypeComponent[] components = structure.getComponents();
+		int countInTable = 0;
+		for (Function func : table) {
+			if (func.getName().equals(name)) {
+				countInTable++;
+			}
+		}
+		int countInStructure = 0;
+		for (DataTypeComponent component : components) {
+			String another = component.getFieldName();
+			if (another.equals(name)) {
+				countInStructure++;
+			}
+			for (int i = 0; i < countInTable; i++) {
+				another = name + "_" + i;
+				if (another.equals(component.getFieldName())) {
+					countInStructure++;
+					break; // Found already
+				}
+			}
+		}
+		if (countInTable < 2) {
+			if (countInStructure > 0) {
+				throw new AssertException("Mismatch between count in table and structure");
+			}
+			return name;
+		}
+		String unique = name + "_" + countInStructure;
+		return unique;
+	}
+
+	/**
 	 * Gets the DataType representation of the _vptr for the specified ClassTypeInfo.
 	 * @param program the program containing the ClassTypeInfo
 	 * @param type the ClassTypeInfo
@@ -448,9 +493,10 @@ public class ClassTypeInfoUtils {
 			if (functionTable.length > 0 && functionTable[i].length > 0) {
 				for (Function function : functionTable[i]) {
 					if (function != null) {
-						if (function.getName().equals(PURE_VIRTUAL_FUNCTION_NAME)) {
+						String name = getUniqueName(function, functionTable[i], struct);
+						if (isPureFunction(function)) {
 							DataType dt = dtm.getPointer(VoidDataType.dataType);
-							struct.add(dt, dt.getLength(), PURE_VIRTUAL_FUNCTION_NAME, null);
+							struct.add(dt, dt.getLength(), name, null);
 							continue;
 						}
 						DataType dt = new FunctionDefinitionDataType(function, false);
@@ -462,7 +508,7 @@ public class ClassTypeInfoUtils {
 							dt = dtm.resolve(dt, DataTypeConflictHandler.KEEP_HANDLER);
 						}
 						dt = dtm.getPointer(dt);
-						struct.add(dt, dt.getLength(), function.getName(), null);
+						struct.add(dt, dt.getLength(), name, null);
 					} else {
 						struct.add(PointerDataType.dataType);
 					}
