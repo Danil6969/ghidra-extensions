@@ -446,6 +446,7 @@ public class ClassTypeInfoUtils {
 		DataTypeComponent[] components = structure.getComponents();
 		int countInTable = 0;
 		for (Function func : table) {
+			if (func == null) continue;
 			if (func.getName().equals(name)) {
 				countInTable++;
 			}
@@ -453,6 +454,7 @@ public class ClassTypeInfoUtils {
 		int countInStructure = 0;
 		for (DataTypeComponent component : components) {
 			String another = component.getFieldName();
+			if (another == null) continue;
 			if (another.equals(name)) {
 				countInStructure++;
 			}
