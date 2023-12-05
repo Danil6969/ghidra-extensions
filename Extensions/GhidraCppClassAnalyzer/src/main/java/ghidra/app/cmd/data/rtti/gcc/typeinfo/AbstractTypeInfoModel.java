@@ -3,6 +3,7 @@ package ghidra.app.cmd.data.rtti.gcc.typeinfo;
 import java.util.regex.Pattern;
 import java.util.regex.Matcher;
 
+import ghidra.app.cmd.data.rtti.AbstractCppClassBuilder;
 import ghidra.app.cmd.data.rtti.TypeInfo;
 import ghidra.app.cmd.data.rtti.gcc.TypeInfoUtils;
 import ghidra.app.util.demangler.DemangledDataType;
@@ -46,7 +47,7 @@ abstract class AbstractTypeInfoModel implements TypeInfo {
 	protected Namespace namespace;
 	private MemoryBufferImpl buf;
 
-	protected static final String SUPER = "super_";
+	protected static final String SUPER = AbstractCppClassBuilder.SUPER;
 	protected static final CategoryPath STD_PATH = new CategoryPath(CategoryPath.ROOT, "std");
 
 	private static final Pattern TYPE_PATTERN = Pattern.compile(".*_\\((.*)\\)");
