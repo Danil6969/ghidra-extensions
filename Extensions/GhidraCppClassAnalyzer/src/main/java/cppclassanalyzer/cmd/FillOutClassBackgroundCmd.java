@@ -3,6 +3,7 @@ package cppclassanalyzer.cmd;
 import java.util.*;
 import java.util.function.Predicate;
 
+import ghidra.app.cmd.data.rtti.AbstractCppClassBuilder;
 import ghidra.app.decompiler.*;
 import ghidra.app.plugin.core.decompile.DecompilerActionContext;
 import ghidra.framework.cmd.BackgroundCommand;
@@ -187,7 +188,7 @@ public final class FillOutClassBackgroundCmd extends BackgroundCommand {
 			comp = struct.getComponent(offset);
 		}
 		if (comp != null && comp.getFieldName() != null) {
-			if (comp.getFieldName().startsWith("super_") && offset == 0) {
+			if (comp.getFieldName().startsWith(AbstractCppClassBuilder.SUPER) && offset == 0) {
 				return;
 			}
 		}
