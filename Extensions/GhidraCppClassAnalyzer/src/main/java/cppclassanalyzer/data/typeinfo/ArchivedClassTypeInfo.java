@@ -1,24 +1,5 @@
 package cppclassanalyzer.data.typeinfo;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-
-import javax.help.UnsupportedOperationException;
-
-import ghidra.app.cmd.data.rtti.ClassTypeInfo;
-import ghidra.app.cmd.data.rtti.Vtable;
-import ghidra.app.cmd.data.rtti.gcc.TypeInfoUtils;
-import ghidra.app.util.SymbolPath;
-import ghidra.app.util.SymbolPathParser;
-import ghidra.app.util.demangler.Demangled;
-import ghidra.app.util.demangler.DemanglerUtil;
-
 import cppclassanalyzer.cmd.CreateExternalSymbolBackgroundCmd;
 import cppclassanalyzer.data.ArchivedRttiData;
 import cppclassanalyzer.data.ClassTypeInfoManager;
@@ -26,12 +7,14 @@ import cppclassanalyzer.data.manager.FileArchiveClassTypeInfoManager;
 import cppclassanalyzer.data.manager.LibraryClassTypeInfoManager;
 import cppclassanalyzer.data.manager.recordmanagers.ArchiveRttiRecordManager;
 import cppclassanalyzer.data.vtable.ArchivedGnuVtable;
+import cppclassanalyzer.database.record.ArchivedClassTypeInfoRecord;
+import ghidra.app.cmd.data.rtti.*;
+import ghidra.app.cmd.data.rtti.gcc.TypeInfoUtils;
+import ghidra.app.util.*;
+import ghidra.app.util.demangler.Demangled;
+import ghidra.app.util.demangler.DemanglerUtil;
 import ghidra.program.model.address.Address;
-import ghidra.program.model.data.CategoryPath;
-import ghidra.program.model.data.DataType;
-import ghidra.program.model.data.DataTypeManager;
-import ghidra.program.model.data.FunctionDefinition;
-import ghidra.program.model.data.Structure;
+import ghidra.program.model.data.*;
 import ghidra.program.model.listing.GhidraClass;
 import ghidra.program.model.listing.Program;
 import ghidra.program.model.symbol.Namespace;
@@ -41,7 +24,9 @@ import ghidra.util.exception.AssertException;
 import ghidra.util.exception.CancelledException;
 import ghidra.util.task.TaskMonitor;
 
-import cppclassanalyzer.database.record.ArchivedClassTypeInfoRecord;
+import javax.help.UnsupportedOperationException;
+import java.lang.reflect.Method;
+import java.util.*;
 
 import static cppclassanalyzer.database.schema.fields.ArchivedClassTypeInfoSchemaFields.*;
 import static ghidra.program.model.data.DataTypeConflictHandler.KEEP_HANDLER;
@@ -81,7 +66,7 @@ public final class ArchivedClassTypeInfo extends ClassTypeInfoDB implements Arch
 		this.classId = type.getTypeId().encode();
 		this.struct = (Structure) archiveDtm.resolve(type.getClassDataType(), KEEP_HANDLER);
 		DataTypeManager dtm = struct.getDataTypeManager();
-		DataType superDt = dtm.getDataType(getCategoryPath(), "super_" + struct.getName());
+		DataType superDt = dtm.getDataType(getCategoryPath(), AbstractCppClassBuilder.SUPER + struct.getName());
 		if (superDt != null) {
 			this.superStruct = (Structure) archiveDtm.resolve(superDt, KEEP_HANDLER);
 		} else {
