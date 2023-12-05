@@ -1,22 +1,13 @@
 package ghidra.app.cmd.data.rtti.gcc;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.Collections;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import ghidra.app.cmd.data.rtti.ClassTypeInfo;
-import ghidra.app.cmd.data.rtti.Vtable;
-import ghidra.app.util.NamespaceUtils;
-import ghidra.app.util.SymbolPath;
+import ghidra.app.cmd.data.rtti.*;
+import ghidra.app.util.*;
 import ghidra.program.model.data.*;
-import ghidra.program.model.listing.Function;
-import ghidra.program.model.listing.GhidraClass;
+import ghidra.program.model.listing.*;
 import ghidra.program.model.symbol.Namespace;
 
 import org.junit.Test;
@@ -151,7 +142,7 @@ public final class ClassBuilderTest extends X86GccRttiTest {
             String name = type.getGhidraClass().getName(true);
             Structure struct = type.getClassDataType();
             for (SerializedClassMember member : members) {
-                if (!member.getFieldName().startsWith("super_")) {
+                if (!member.getFieldName().startsWith(AbstractCppClassBuilder.SUPER)) {
                     // only the super classes would be defined
                     continue;
                 }
