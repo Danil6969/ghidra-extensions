@@ -12,7 +12,7 @@ public class TVmtFieldExEntry {
 	public static StructureDataType getDataType(CategoryPath path, DataTypeManager manager) {
 		StructureDataType dt = new StructureDataType(path, "TVmtFieldExEntry", 0, manager);
 		dt.add(Byte.getDataType(path, manager), "Flags", "");
-		dt.add(PPTypeInfo.getDataType(path, manager), "TypeRef", "pointer to a RTTI record");
+		dt.add(PPTypeInfo.getDataType(path, manager), "TypeRef", "Pointer to RTTI record");
 		dt.add(Cardinal.getDataType(path, manager), "Offset", "");
 		dt.add(new ArrayDataType(CharDataType.dataType, 0, 1), "Name", "");
 		return dt;

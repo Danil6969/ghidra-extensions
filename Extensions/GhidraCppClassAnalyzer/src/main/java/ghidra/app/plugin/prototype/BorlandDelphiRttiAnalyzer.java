@@ -22,7 +22,7 @@ import java.util.*;
 
 public class BorlandDelphiRttiAnalyzer extends AbstractAnalyzer {
 
-	public static final String ANALYZER_NAME = "Borland Delphi RTTI Analyzer";
+	private static final String ANALYZER_NAME = "Borland Delphi RTTI Analyzer";
 	private static final String DESCRIPTION =
 		"This analyzer finds and creates all of the RTTI metadata structures and their associated vtables.";
 	private Program program;

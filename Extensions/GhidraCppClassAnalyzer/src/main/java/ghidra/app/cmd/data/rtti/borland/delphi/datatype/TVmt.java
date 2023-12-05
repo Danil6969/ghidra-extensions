@@ -17,16 +17,16 @@ public class TVmt {
 		int pointerSize = pointerDT.getLength();
 		StructureDataType dt = new StructureDataType(path, "TVmt", 0, manager);
 		dt.add(pointerDT, "SelfPtr", "Pointer to self");
-		dt.add(pointerDT, "IntfTable", "Pointer to interface table");
-		dt.add(pointerDT, "AutoTable", "Pointer to automation initialization");
-		dt.add(pointerDT, "InitTable", "Pointer to object initialization");
-		dt.add(PTypeInfo.getDataType(path, manager), "TypeInfo", "Pointer to type information table");
-		dt.add(PVmtFieldTable.getDataType(path, manager), "FieldTable", "Pointer to field definition table");
-		dt.add(PVmtMethodTable.getDataType(path, manager), "MethodTable", "Pointer to method definition table");
-		dt.add(pointerDT, "DynamicTable", "Pointer to dynamic method table");
-		dt.add(PShortString.getDataType(path, manager), "ClassName", "Class name pointer");
-		dt.add(SizeIntDT, "InstanceSize", "Instance size");
-		dt.add(pointerDT, "Parent", "Pointer to parent class");
+		dt.add(pointerDT, "IntfTable", "Pointer to interfaces table");
+		dt.add(pointerDT, "AutoTable", "Pointer to Automation interfaces table");
+		dt.add(pointerDT, "InitTable", "Pointer to initialization information");
+		dt.add(PTypeInfo.getDataType(path, manager), "TypeInfo", "Pointer to class type info record");
+		dt.add(PVmtFieldTable.getDataType(path, manager), "FieldTable", "Pointer to table with field information");
+		dt.add(PVmtMethodTable.getDataType(path, manager), "MethodTable", "Pointer to table with virtual methods");
+		dt.add(pointerDT, "DynamicTable", "Pointer to table with dynamic methods");
+		dt.add(PShortString.getDataType(path, manager), "ClassName", "Pointer to shortstring with classname");
+		dt.add(SizeIntDT, "InstanceSize", "Class instance size");
+		dt.add(pointerDT, "Parent", "Pointer to parent VMT");
 		while (dt.getLength() < maxLength - (maxLength % pointerSize)) {
 			dt.add(pointerDT);
 		}
@@ -36,11 +36,12 @@ public class TVmt {
 		return dt;
 	}
 
-	public static void putObject(Address address, long maxLength, CategoryPath path, Program program) {
+	public static Address putObject(Address address, long maxLength, CategoryPath path, Program program) {
 		ProgramBasedDataTypeManager manager = program.getDataTypeManager();
 		StructureDataType TVmtDT = TVmt.getDataType(maxLength, path, manager);
 		PointerDataType pointerDT = PointerDataType.dataType;
 		PascalString255DataType stringDT = PascalString255DataType.dataType;
+		Address startAddress = address;
 		ListingUtils.deleteCreateData(address, TVmtDT, program);
 		address = address.add(pointerDT.getLength());
 		address = address.add(pointerDT.getLength());
@@ -62,6 +63,7 @@ public class TVmt {
 		if (vmtClassName != null) {
 			ListingUtils.deleteCreateData(vmtClassName, stringDT, program);
 		}
+		return startAddress.add(maxLength);
 	}
 
 	public static boolean isValid(Address address, long maxLength, List<Relocation> relocations, Program program) {

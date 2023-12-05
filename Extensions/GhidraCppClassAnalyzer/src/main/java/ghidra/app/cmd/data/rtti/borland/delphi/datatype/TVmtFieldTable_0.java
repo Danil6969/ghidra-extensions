@@ -22,10 +22,9 @@ public class TVmtFieldTable_0 {
 			ProgramBasedDataTypeManager manager = program.getDataTypeManager();
 			ListingUtils.deleteCreateData(address, getDataType(path, manager), program);
 			TypedefDataType wordDT = Word.getDataType(path, manager);
-			PointerDataType pointerDT = PointerDataType.dataType;
+			StructureDataType thisDT = TVmtFieldTable_0.getDataType(path, manager);
 			long count = MemoryUtil.readNumber(address, wordDT.getLength(), program);
-			address = address.add(wordDT.getLength());
-			address = address.add(pointerDT.getLength());
+			address = address.add(thisDT.getLength());
 			for (int i = 0; i < count; i++) {
 				address = TVmtFieldEntry.putObject(address, path, program);
 			}
