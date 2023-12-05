@@ -6,6 +6,7 @@ import java.util.stream.Collectors;
 
 import cppclassanalyzer.utils.ConstantPropagationUtils;
 import cppclassanalyzer.utils.CppClassAnalyzerUtils;
+import ghidra.app.cmd.data.rtti.AbstractCppClassBuilder;
 import ghidra.app.cmd.data.rtti.ClassTypeInfo;
 import ghidra.app.cmd.data.rtti.gcc.ClassTypeInfoUtils;
 import ghidra.framework.cmd.BackgroundCommand;
@@ -182,7 +183,7 @@ public abstract class AbstractConstructorAnalysisCmd extends BackgroundCommand {
 			this.offsets = new IntSet(type.getParentModels().length);
 			DataTypeComponent[] comps = type.getClassDataType().getDefinedComponents();
 			Arrays.stream(comps)
-				.filter(c -> c.getFieldName().contains("super_"))
+				.filter(c -> c.getFieldName().contains(AbstractCppClassBuilder.SUPER))
 				.mapToInt(DataTypeComponent::getOffset)
 				.forEach(offsets::add);
 		}
@@ -212,7 +213,7 @@ public abstract class AbstractConstructorAnalysisCmd extends BackgroundCommand {
 			String name = type.getClassDataType()
 				.getComponentAt(offset)
 				.getFieldName()
-				.replace("super_", "");
+				.replace(AbstractCppClassBuilder.SUPER, "");
 			return Arrays.stream(type.getParentModels())
 				.filter(t -> t.getName().equals(name))
 				.findFirst()
