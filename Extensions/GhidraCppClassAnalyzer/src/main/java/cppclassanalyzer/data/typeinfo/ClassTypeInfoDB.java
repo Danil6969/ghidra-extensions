@@ -2,6 +2,7 @@ package cppclassanalyzer.data.typeinfo;
 
 import java.util.Map;
 
+import ghidra.app.cmd.data.rtti.AbstractCppClassBuilder;
 import ghidra.app.cmd.data.rtti.ClassTypeInfo;
 import ghidra.program.database.DatabaseObject;
 import cppclassanalyzer.data.ClassTypeInfoManager;
@@ -70,7 +71,7 @@ public abstract class ClassTypeInfoDB extends DatabaseObject implements ClassTyp
 		if (!dtm.containsCategory(path)) {
 			return struct;
 		}
-		DataType superStruct = dtm.getDataType(path, "super_"+struct.getName());
+		DataType superStruct = dtm.getDataType(path, AbstractCppClassBuilder.SUPER + struct.getName());
 		return superStruct != null ? (Structure) superStruct : struct;
 	}
 
