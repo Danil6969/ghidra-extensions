@@ -1,6 +1,8 @@
 package ghidra.app.cmd.data.rtti.borland.delphi.helpers.system;
 
 import ghidra.app.cmd.data.rtti.borland.delphi.helpers.HelperFunction;
+import ghidra.program.model.address.Address;
+import ghidra.program.model.listing.Program;
 
 public class HandleFinallyInternal extends HelperFunction {
 	@Override
@@ -9,7 +11,7 @@ public class HandleFinallyInternal extends HelperFunction {
 	}
 
 	@Override
-	public boolean isValid() {
-		return true;
+	public boolean isValid(Program program, Address address) {
+		return false;
 	}
 }

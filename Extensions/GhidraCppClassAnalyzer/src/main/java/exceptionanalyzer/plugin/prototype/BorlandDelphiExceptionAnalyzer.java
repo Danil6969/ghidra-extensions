@@ -34,26 +34,32 @@ public class BorlandDelphiExceptionAnalyzer extends AbstractAnalyzer {
 	public boolean added(Program program, AddressSetView set, TaskMonitor monitor, MessageLog log)
 		throws CancelledException {
 		Listing listing = program.getListing();
-		AddressRangeIterator ranges = set.getAddressRanges();
-
-		while (ranges.hasNext()) {
-			AddressRange range = ranges.next();
-			AddressSpace space = range.getAddressSpace();
-			if (space.getName().equals("EXTERNAL")) {
-				continue;
-			}
+		AddressRange[] ranges = getRanges(set);
+		for (AddressRange range : ranges) {
 			Address address = range.getMinAddress();
-
 			InstructionIterator instructions = listing.getInstructions(address, true);
 			while (instructions.hasNext()) {
 				Instruction instruction = instructions.next();
 				createCommonFunction(program, instruction.getAddress());
 			}
 		}
+		collectAddresses(program, ranges);
 		return true;
 	}
 
-	//private AddressRange[]
+	private AddressRange[] getRanges(AddressSetView set) {
+		List<AddressRange> list = new ArrayList<>();
+		AddressRangeIterator ranges = set.getAddressRanges();
+		while (ranges.hasNext()) {
+			AddressRange range = ranges.next();
+			AddressSpace space = range.getAddressSpace();
+			if (space.getName().equals("EXTERNAL")) {
+				continue;
+			}
+			list.add(range);
+		}
+		return list.toArray(new AddressRange[list.size()]);
+	}
 
 	// Checks common prologue and creates function
 	private boolean createCommonFunction(Program program, Address address) {
@@ -61,6 +67,7 @@ public class BorlandDelphiExceptionAnalyzer extends AbstractAnalyzer {
 		if (listing.getFunctionAt(address) != null) {
 			return false;
 		}
+
 		Address currentAddress = address;
 		Instruction instruction0 = listing.getInstructionAt(currentAddress);
 		if (instruction0 == null) {
@@ -78,6 +85,7 @@ public class BorlandDelphiExceptionAnalyzer extends AbstractAnalyzer {
 		if (!instruction1.toString().equals("MOV EBP,ESP")) {
 			return false;
 		}
+
 		new CreateFunctionCmd(address).applyTo(program);
 		return true;
 	}
@@ -88,11 +96,12 @@ public class BorlandDelphiExceptionAnalyzer extends AbstractAnalyzer {
 		return list.toArray(new HelperFunction[list.size()]);
 	}
 
-	private void collectAddresses(Program program) {
+	private Map<String, Address[]> collectAddresses(Program program, AddressRange[] ranges) {
 		HelperFunction[] helpers = getHelpers();
-		Map<String, Address> addrMap;
+		Map<String, Address[]> map = new HashMap<>();
 		for (HelperFunction helper : helpers) {
-			;
+			map.put(helper.getName(), helper.getMatches(program, ranges));
 		}
+		return map;
 	}
 }
