@@ -1,9 +1,15 @@
 package ghidra.app.cmd.data.rtti.borland.delphi.helpers.system;
 
-public class HandleOnException {
-	public static final String NAME = "System.@HandleOnException";
+import ghidra.app.cmd.data.rtti.borland.delphi.helpers.HelperFunction;
 
-	public static boolean isValid() {
+public class HandleOnException extends HelperFunction {
+	@Override
+	public String getName() {
+		return "System.@HandleOnException";
+	}
+
+	@Override
+	public boolean isValid() {
 		return true;
 	}
 }

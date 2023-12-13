@@ -1,9 +1,15 @@
 package ghidra.app.cmd.data.rtti.borland.delphi.helpers.system;
 
-public class FpuInit {
-	public static final String NAME = "System.@FpuInit";
+import ghidra.app.cmd.data.rtti.borland.delphi.helpers.HelperFunction;
 
-	public static boolean isValid() {
+public class FpuInit extends HelperFunction {
+	@Override
+	public String getName() {
+		return "System.@FpuInit";
+	}
+
+	@Override
+	public boolean isValid() {
 		return true;
 	}
 }

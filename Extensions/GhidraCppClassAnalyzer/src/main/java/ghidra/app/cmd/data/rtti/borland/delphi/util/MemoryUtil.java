@@ -10,7 +10,7 @@ import ghidra.program.model.reloc.Relocation;
 import java.util.List;
 
 public class MemoryUtil {
-	public static boolean containsValidPointer(Address address, List<Relocation> relocations, Program program) {
+	public static boolean containsValidPointer(Address address, Relocation[] relocations, Program program) {
 		try {
 			long num = readNumber(address, PointerDataType.dataType.getLength(), program);
 			if (num == 0) return true; // null pointer is valid

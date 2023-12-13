@@ -1,9 +1,15 @@
 package ghidra.app.cmd.data.rtti.borland.delphi.helpers.system;
 
-public class DoneExcept {
-	public static final String NAME = "System.@DoneExcept";
+import ghidra.app.cmd.data.rtti.borland.delphi.helpers.HelperFunction;
 
-	public static boolean isValid() {
+public class DoneExcept extends HelperFunction {
+	@Override
+	public String getName() {
+		return "System.@DoneExcept";
+	}
+
+	@Override
+	public boolean isValid() {
 		return true;
 	}
 }

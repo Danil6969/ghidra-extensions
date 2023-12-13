@@ -1,9 +1,15 @@
 package ghidra.app.cmd.data.rtti.borland.delphi.helpers.system;
 
-public class HandleFinallyInternal {
-	public static final String NAME = "System.@HandleFinallyInternal";
+import ghidra.app.cmd.data.rtti.borland.delphi.helpers.HelperFunction;
 
-	public static boolean isValid() {
+public class HandleFinallyInternal extends HelperFunction {
+	@Override
+	public String getName() {
+		return "System.@HandleFinallyInternal";
+	}
+
+	@Override
+	public boolean isValid() {
 		return true;
 	}
 }

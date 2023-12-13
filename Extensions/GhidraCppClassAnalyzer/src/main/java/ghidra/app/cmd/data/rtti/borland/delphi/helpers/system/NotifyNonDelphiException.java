@@ -1,9 +1,15 @@
 package ghidra.app.cmd.data.rtti.borland.delphi.helpers.system;
 
-public class NotifyNonDelphiException {
-	public static final String NAME = "System.NotifyNonDelphiException";
+import ghidra.app.cmd.data.rtti.borland.delphi.helpers.HelperFunction;
 
-	public static boolean isValid() {
+public class NotifyNonDelphiException extends HelperFunction {
+	@Override
+	public String getName() {
+		return "System.NotifyNonDelphiException";
+	}
+
+	@Override
+	public boolean isValid() {
 		return true;
 	}
 }

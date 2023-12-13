@@ -1,16 +1,17 @@
 package exceptionanalyzer.plugin.prototype;
 
+import ghidra.app.cmd.data.rtti.borland.delphi.helpers.HelperFunction;
+import ghidra.app.cmd.data.rtti.borland.delphi.helpers.system.HandleFinally;
 import ghidra.app.cmd.function.CreateFunctionCmd;
 import ghidra.app.services.AbstractAnalyzer;
 import ghidra.app.services.AnalyzerType;
 import ghidra.app.util.importer.MessageLog;
 import ghidra.program.model.address.*;
-import ghidra.program.model.listing.Instruction;
-import ghidra.program.model.listing.InstructionIterator;
-import ghidra.program.model.listing.Listing;
-import ghidra.program.model.listing.Program;
+import ghidra.program.model.listing.*;
 import ghidra.util.exception.CancelledException;
 import ghidra.util.task.TaskMonitor;
+
+import java.util.*;
 
 public class BorlandDelphiExceptionAnalyzer extends AbstractAnalyzer {
 
@@ -46,13 +47,17 @@ public class BorlandDelphiExceptionAnalyzer extends AbstractAnalyzer {
 			InstructionIterator instructions = listing.getInstructions(address, true);
 			while (instructions.hasNext()) {
 				Instruction instruction = instructions.next();
-				createMissingFunction(program, listing, instruction.getAddress());
+				createCommonFunction(program, instruction.getAddress());
 			}
 		}
 		return true;
 	}
 
-	private boolean createMissingFunction(Program program, Listing listing, Address address) {
+	//private AddressRange[]
+
+	// Checks common prologue and creates function
+	private boolean createCommonFunction(Program program, Address address) {
+		Listing listing = program.getListing();
 		if (listing.getFunctionAt(address) != null) {
 			return false;
 		}
@@ -75,5 +80,19 @@ public class BorlandDelphiExceptionAnalyzer extends AbstractAnalyzer {
 		}
 		new CreateFunctionCmd(address).applyTo(program);
 		return true;
+	}
+
+	private HelperFunction[] getHelpers() {
+		List<HelperFunction> list = new ArrayList<>();
+		list.add(new HandleFinally());
+		return list.toArray(new HelperFunction[list.size()]);
+	}
+
+	private void collectAddresses(Program program) {
+		HelperFunction[] helpers = getHelpers();
+		Map<String, Address> addrMap;
+		for (HelperFunction helper : helpers) {
+			;
+		}
 	}
 }

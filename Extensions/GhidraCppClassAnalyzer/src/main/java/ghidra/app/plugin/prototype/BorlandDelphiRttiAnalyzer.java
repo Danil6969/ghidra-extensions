@@ -39,8 +39,7 @@ public class BorlandDelphiRttiAnalyzer extends AbstractAnalyzer {
 	private StructureDataType TVmtDT;
 	private long TVmtSize;
 	private SymbolTable symbolTable;
-	RelocationTable relocationTable;
-	List<Relocation> relocations;
+	Relocation[] relocations;
 	List<Address> pending;
 	List<Address> ready;
 
@@ -100,17 +99,21 @@ public class BorlandDelphiRttiAnalyzer extends AbstractAnalyzer {
 		TTypeInfoDT = TTypeInfo.getDataType(systemPath, dataTypeManager);
 		PointerDT = PointerDataType.dataType;
 
-		relocationTable = program.getRelocationTable();
-		Iterator<Relocation> iterator = relocationTable.getRelocations();
-		relocations = new ArrayList<>();
-		while (iterator.hasNext()) {
-			Relocation relocation = iterator.next();
-			relocations.add(relocation);
-		}
+		relocations = getRelocations(program.getRelocationTable());
 		symbolTable = program.getSymbolTable();
 		ready = new LinkedList<>();
 		pending = new LinkedList<>();
 		return true;
+	}
+
+	private Relocation[] getRelocations(RelocationTable table) {
+		Iterator<Relocation> iterator = table.getRelocations();
+		List<Relocation> list = new ArrayList<>();
+		while (iterator.hasNext()) {
+			Relocation relocation = iterator.next();
+			list.add(relocation);
+		}
+		return list.toArray(new Relocation[list.size()]);
 	}
 
 	private String getCompilerVersion() {

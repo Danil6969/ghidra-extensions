@@ -66,7 +66,7 @@ public class TVmt {
 		return startAddress.add(maxLength);
 	}
 
-	public static boolean isValid(Address address, long maxLength, List<Relocation> relocations, Program program) {
+	public static boolean isValid(Address address, long maxLength, Relocation[] relocations, Program program) {
 		try {
 			int pointerSize = PointerDataType.dataType.getLength();
 			for (int i = 0; i < 9; i++) {
