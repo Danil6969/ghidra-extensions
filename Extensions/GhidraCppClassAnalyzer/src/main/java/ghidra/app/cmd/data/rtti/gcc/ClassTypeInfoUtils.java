@@ -191,13 +191,14 @@ public class ClassTypeInfoUtils {
 	public static Structure getPlaceholderStruct(ClassTypeInfo type, DataTypeManager dtm) {
 		ProgramClassTypeInfoManager manager =
 			CppClassAnalyzerUtils.getManager(type.getGhidraClass().getSymbol().getProgram());
-		DataType thiscallStruct =
+		Structure thiscallStruct =
 			VariableUtilities.findOrCreateClassStruct(type.getGhidraClass(), dtm);
 		ClassTypeInfo otherType = manager.getType(thiscallStruct.getUniversalID());
 		if (otherType != null && !otherType.equals(type)) {
 			return getFixedIncorrectStructure(type, dtm);
 		}
-		CategoryPath path = TypeInfoUtils.getCategoryPath(type);
+		return thiscallStruct;
+		/*CategoryPath path = TypeInfoUtils.getCategoryPath(type);
 		CategoryPath otherPath = thiscallStruct.getCategoryPath();
 		if (!path.isRoot() && !otherPath.isRoot()) {
 			if (path.equals(otherPath)) {
@@ -213,7 +214,7 @@ public class ClassTypeInfoUtils {
 			// assume VariableUtilities found the type from debug info
 			return (Structure) thiscallStruct;
 		}
-		return getFixedIncorrectStructure(type, dtm);
+		return getFixedIncorrectStructure(type, dtm);*/
 	}
 
 	private static Structure getFixedIncorrectStructure(ClassTypeInfo type, DataTypeManager dtm) {
