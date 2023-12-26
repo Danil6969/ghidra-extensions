@@ -517,7 +517,11 @@ public class ClassTypeInfoUtils {
 					}
 				}
 			}
-			struct = (Structure) dtm.resolve(struct, DataTypeConflictHandler.REPLACE_HANDLER);
+			DataTypeConflictHandler handler = DataTypeConflictHandler.REPLACE_HANDLER;
+			if (struct.isZeroLength()) {
+				handler = DataTypeConflictHandler.KEEP_HANDLER;
+			}
+			struct = (Structure) dtm.resolve(struct, handler);
 			return dtm.getPointer(struct);
 		} catch (DuplicateNameException e) {
 			throw new AssertException("Ghidra-Cpp-Class-Analyzer: "+e.getMessage(), e);
