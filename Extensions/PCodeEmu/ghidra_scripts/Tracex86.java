@@ -39,9 +39,7 @@ import ghidra.trace.model.time.schedule.TraceSchedule;
 import ghidra.util.NumericUtilities;
 
 import java.lang.invoke.MethodHandles;
-import java.util.Map;
-import java.util.NavigableMap;
-import java.util.Set;
+import java.util.*;
 
 public class Tracex86 extends GhidraScript {
 	StringBuffer dumped;
@@ -104,7 +102,7 @@ public class Tracex86 extends GhidraScript {
 					lang, "test", lang.getProgramCounter().getName() + " = 0x" + start + ";", lib);
 			exec.execute(initProg, lib);
 			TraceSnapshot initial = timeManager.createSnapshot("Emulation started at " + startAddr);
-			ProgramEmulationUtils.loadExecutable(initial, currentProgram);
+			ProgramEmulationUtils.loadExecutable(initial, currentProgram, List.of());
 		}
 
 		TraceSchedule schedule = TraceSchedule.parse("0:.t0-1");
