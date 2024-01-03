@@ -425,7 +425,7 @@ public class ClassTypeInfoUtils {
 			else {
 				name = demangled.getNamespace() + "::" + demangled.getName();
 			}
-			name = name + "_t";
+			//name = name + "_t";
 			dataType.setName(name);
 		} catch (InvalidNameException | DuplicateNameException e) {}
 	}
@@ -490,16 +490,18 @@ public class ClassTypeInfoUtils {
 			CategoryPath path =
 				new CategoryPath(TypeInfoUtils.getCategoryPath(type), type.getName());
 			DataTypeManager dtm = program.getDataTypeManager();
-			Structure struct = new StructureDataType(path, type.getName() + "::" + VtableModel.SYMBOL_NAME + "_t", 0, dtm);
+			String name = type.getName() + "::" + VtableModel.SYMBOL_NAME;
+			//name = name + "_t";
+			Structure struct = new StructureDataType(path, name, 0, dtm);
 			Function[][] functionTable = vtable.getFunctionTables();
 			int i = getTableIndex(program, vtable, mode);
 			if (functionTable.length > 0 && functionTable[i].length > 0) {
 				for (Function function : functionTable[i]) {
 					if (function != null) {
-						String name = getUniqueName(function, functionTable[i], struct);
+						String uniqueName = getUniqueName(function, functionTable[i], struct);
 						if (isPureFunction(function)) {
 							DataType dt = dtm.getPointer(VoidDataType.dataType);
-							struct.add(dt, dt.getLength(), name, null);
+							struct.add(dt, dt.getLength(), uniqueName, null);
 							continue;
 						}
 						DataType dt = new FunctionDefinitionDataType(function, false);
@@ -511,7 +513,7 @@ public class ClassTypeInfoUtils {
 							dt = dtm.resolve(dt, DataTypeConflictHandler.KEEP_HANDLER);
 						}
 						dt = dtm.getPointer(dt);
-						struct.add(dt, dt.getLength(), name, null);
+						struct.add(dt, dt.getLength(), uniqueName, null);
 					} else {
 						struct.add(PointerDataType.dataType);
 					}
