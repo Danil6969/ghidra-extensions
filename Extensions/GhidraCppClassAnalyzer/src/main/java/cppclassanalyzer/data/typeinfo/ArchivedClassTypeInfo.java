@@ -66,7 +66,7 @@ public final class ArchivedClassTypeInfo extends ClassTypeInfoDB implements Arch
 		this.classId = type.getTypeId().encode();
 		this.struct = (Structure) archiveDtm.resolve(type.getClassDataType(), KEEP_HANDLER);
 		DataTypeManager dtm = struct.getDataTypeManager();
-		DataType superDt = dtm.getDataType(getCategoryPath(), AbstractCppClassBuilder.SUPER + struct.getName());
+		DataType superDt = dtm.getDataType(getCategoryPath(), AbstractCppClassBuilder.SUPER + struct.getName() + "_t");
 		if (superDt != null) {
 			this.superStruct = (Structure) archiveDtm.resolve(superDt, KEEP_HANDLER);
 		} else {
