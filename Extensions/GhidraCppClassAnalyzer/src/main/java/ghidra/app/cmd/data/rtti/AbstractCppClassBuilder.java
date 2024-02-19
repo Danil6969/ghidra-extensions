@@ -127,7 +127,7 @@ public abstract class AbstractCppClassBuilder {
 			return struct;
 		}
 		DataTypeManager dtm = program.getDataTypeManager();
-		DataTypePath dtPath = new DataTypePath(path, SUPER+type.getName());
+		DataTypePath dtPath = new DataTypePath(path, SUPER + type.getName() + "_t");
 		DataType dt = dtm.getDataType(dtPath);
 		if (dt == null) {
 			Structure superStruct = (Structure) struct.copy(dtm);
