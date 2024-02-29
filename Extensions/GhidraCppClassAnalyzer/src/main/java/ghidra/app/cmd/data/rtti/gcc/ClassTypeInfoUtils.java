@@ -11,6 +11,8 @@ import cppclassanalyzer.utils.CppClassAnalyzerUtils;
 import ghidra.app.util.demangler.DemangledObject;
 import ghidra.app.util.demangler.DemanglerUtil;
 import ghidra.docking.settings.Settings;
+import ghidra.program.model.address.AddressSpace;
+import ghidra.program.model.mem.MemoryAccessException;
 import ghidra.util.InvalidNameException;
 import util.CollectionUtils;
 
@@ -373,42 +375,66 @@ public class ClassTypeInfoUtils {
 	 * @return the index for function table
 	 */
 	private static int getTableIndex(Program program, Vtable vtable, VtableMode mode) {
-		Function[][] functionTable = vtable.getFunctionTables();
-		if (functionTable.length == 0) {
-			return 0; // No function tables, return with 0 early
-		}
-		if (functionTable.length == 1) {
-			return 0; // Single function table, return with 0 early
-		}
-
-		if (mode == VtableMode.VS) {
-			return functionTable.length - 1;
-		}
-
-		if (mode == VtableMode.GCC) {
-			Memory mem = program.getMemory();
-			DataType ptrDiff = GnuUtils.getPtrDiff_t(program.getDataTypeManager());
-			int diffLen = ptrDiff.getLength();
-			Settings settings = ptrDiff.getDefaultSettings();
-			Address[] addresses = vtable.getTableAddresses();
-			for (int i = 0; i < addresses.length; i++) {
-				Address addr = addresses[i];
-				int size = addr.getPointerSize();
-				Address diffAddr = addr.subtract(size * 2);
-				MemBuffer buf = new DumbMemBufferImpl(mem, diffAddr);
-				Object value = ptrDiff.getValue(buf, settings, diffLen);
-				if (!(value instanceof Scalar)) {
-					throw new AssertException("Expected scalar datatype");
-				}
-				Scalar scalarValue = (Scalar) value;
-				if (scalarValue.getValue() == 0) {
-					return i;
-				}
+		try {
+			Function[][] functionTable = vtable.getFunctionTables();
+			if (functionTable.length == 0) {
+				return 0; // No function tables, return with 0 early
 			}
-			return 0; // Use default if failed to find zero diff table
-		}
+			if (functionTable.length == 1) {
+				return 0; // Single function table, return with 0 early
+			}
 
-		return 0; // Zeroth table is also default if mode isn't supported
+			if (mode == VtableMode.VS) {
+				Memory memory = program.getMemory();
+				Address[] addresses = vtable.getTableAddresses();
+				for (int i = 0; i < addresses.length; i++) {
+					Address address = addresses[i];
+					AddressSpace space = address.getAddressSpace();
+					int pointerLength = address.getPointerSize();
+					Address metaAddress = address.subtract(pointerLength);
+					MemBuffer buffer = new DumbMemBufferImpl(memory, metaAddress);
+					if (pointerLength > 8) {
+						throw new AssertException("Expected scalar datatype");
+					}
+					long value = buffer.getBigInteger(0, pointerLength, false).longValue();
+					Address locatoraddress = space.getAddress(value);
+					Address offsetAddress = locatoraddress.add(4);
+					buffer = new DumbMemBufferImpl(memory, offsetAddress);
+					value = buffer.getBigInteger(0, 4, false).longValue();
+					CodeUnit unit = program.getListing().getCodeUnitAt(locatoraddress);
+					if (value == 0) {
+						return i;
+					}
+				}
+				return 0;
+			}
+
+			if (mode == VtableMode.GCC) {
+				Memory memory = program.getMemory();
+				DataType ptrDiff = GnuUtils.getPtrDiff_t(program.getDataTypeManager());
+				int ptrdiffLength = ptrDiff.getLength();
+				Settings settings = ptrDiff.getDefaultSettings();
+				Address[] addresses = vtable.getTableAddresses();
+				for (int i = 0; i < addresses.length; i++) {
+					Address addr = addresses[i];
+					int pointerLength = addr.getPointerSize();
+					Address diffAddr = addr.subtract(pointerLength * 2);
+					MemBuffer buffer = new DumbMemBufferImpl(memory, diffAddr);
+					Object value = ptrDiff.getValue(buffer, settings, ptrdiffLength);
+					if (!(value instanceof Scalar)) {
+						throw new AssertException("Expected scalar datatype");
+					}
+					Scalar scalarValue = (Scalar) value;
+					if (scalarValue.getValue() == 0) {
+						return i;
+					}
+				}
+				return 0; // Use default if failed to find zero diff table
+			}
+			return 0; // Zeroth table is also default if mode isn't supported
+		} catch (MemoryAccessException e) {
+			return 0; // Maybe invalid address or something
+		}
 	}
 
 	public static void processFunctionDefinitionName(DataType dataType) {
