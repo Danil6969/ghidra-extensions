@@ -367,76 +367,6 @@ public class ClassTypeInfoUtils {
 			classes.addAll(sortedClasses);
 	}
 
-	/**
-	 * Gets index which corresponds to base (zero offset) function table.
-	 * @param program the program containing the vtable
-	 * @param vtable the vtable
-	 * @param mode determines how the table is chosen
-	 * @return the index for function table
-	 */
-	private static int getTableIndex(Program program, Vtable vtable, VtableMode mode) {
-		try {
-			Function[][] functionTable = vtable.getFunctionTables();
-			if (functionTable.length == 0) {
-				return 0; // No function tables, return with 0 early
-			}
-			if (functionTable.length == 1) {
-				return 0; // Single function table, return with 0 early
-			}
-
-			if (mode == VtableMode.VS) {
-				Memory memory = program.getMemory();
-				Address[] addresses = vtable.getTableAddresses();
-				for (int i = 0; i < addresses.length; i++) {
-					Address address = addresses[i];
-					AddressSpace space = address.getAddressSpace();
-					int pointerLength = address.getPointerSize();
-					Address metaAddress = address.subtract(pointerLength);
-					MemBuffer buffer = new DumbMemBufferImpl(memory, metaAddress);
-					if (pointerLength > 8) {
-						throw new AssertException("Expected scalar datatype");
-					}
-					long value = buffer.getBigInteger(0, pointerLength, false).longValue();
-					Address locatoraddress = space.getAddress(value);
-					Address offsetAddress = locatoraddress.add(4);
-					buffer = new DumbMemBufferImpl(memory, offsetAddress);
-					value = buffer.getBigInteger(0, 4, false).longValue();
-					CodeUnit unit = program.getListing().getCodeUnitAt(locatoraddress);
-					if (value == 0) {
-						return i;
-					}
-				}
-				return 0;
-			}
-
-			if (mode == VtableMode.GCC) {
-				Memory memory = program.getMemory();
-				DataType ptrDiff = GnuUtils.getPtrDiff_t(program.getDataTypeManager());
-				int ptrdiffLength = ptrDiff.getLength();
-				Settings settings = ptrDiff.getDefaultSettings();
-				Address[] addresses = vtable.getTableAddresses();
-				for (int i = 0; i < addresses.length; i++) {
-					Address addr = addresses[i];
-					int pointerLength = addr.getPointerSize();
-					Address diffAddr = addr.subtract(pointerLength * 2);
-					MemBuffer buffer = new DumbMemBufferImpl(memory, diffAddr);
-					Object value = ptrDiff.getValue(buffer, settings, ptrdiffLength);
-					if (!(value instanceof Scalar)) {
-						throw new AssertException("Expected scalar datatype");
-					}
-					Scalar scalarValue = (Scalar) value;
-					if (scalarValue.getValue() == 0) {
-						return i;
-					}
-				}
-				return 0; // Use default if failed to find zero diff table
-			}
-			return 0; // Zeroth table is also default if mode isn't supported
-		} catch (MemoryAccessException e) {
-			return 0; // Maybe invalid address or something
-		}
-	}
-
 	public static void processFunctionDefinitionName(DataType dataType) {
 		try {
 			String name = dataType.getName();
@@ -503,6 +433,83 @@ public class ClassTypeInfoUtils {
 		return unique;
 	}
 
+	private static int getVSVtableIndex(Program program, Vtable vtable) {
+		try {
+			Memory memory = program.getMemory();
+			Address[] addresses = vtable.getTableAddresses();
+			for (int i = 0; i < addresses.length; i++) {
+				Address address = addresses[i];
+				AddressSpace space = address.getAddressSpace();
+				int pointerLength = address.getPointerSize();
+				Address metaAddress = address.subtract(pointerLength);
+				MemBuffer buffer = new DumbMemBufferImpl(memory, metaAddress);
+				if (pointerLength > 8) {
+					throw new AssertException("Expected scalar datatype");
+				}
+				long value = buffer.getBigInteger(0, pointerLength, false).longValue();
+				Address locatoraddress = space.getAddress(value);
+				Address offsetAddress = locatoraddress.add(4);
+				buffer = new DumbMemBufferImpl(memory, offsetAddress);
+				value = buffer.getBigInteger(0, 4, false).longValue();
+				CodeUnit unit = program.getListing().getCodeUnitAt(locatoraddress);
+				if (value == 0) {
+					return i;
+				}
+			}
+		}
+		catch (MemoryAccessException e) {}
+		return 0;
+	}
+
+	private static int getGCCVtableIndex(Program program, Vtable vtable) {
+		Memory memory = program.getMemory();
+		DataType ptrDiff = GnuUtils.getPtrDiff_t(program.getDataTypeManager());
+		int ptrdiffLength = ptrDiff.getLength();
+		Settings settings = ptrDiff.getDefaultSettings();
+		Address[] addresses = vtable.getTableAddresses();
+		for (int i = 0; i < addresses.length; i++) {
+			Address addr = addresses[i];
+			int pointerLength = addr.getPointerSize();
+			Address diffAddr = addr.subtract(pointerLength * 2);
+			MemBuffer buffer = new DumbMemBufferImpl(memory, diffAddr);
+			Object value = ptrDiff.getValue(buffer, settings, ptrdiffLength);
+			if (!(value instanceof Scalar)) {
+				throw new AssertException("Expected scalar datatype");
+			}
+			Scalar scalarValue = (Scalar) value;
+			if (scalarValue.getValue() == 0) {
+				return i;
+			}
+		}
+		return 0;
+	}
+
+	/**
+	 * Gets index which corresponds to base (zero offset) function table.
+	 * @param program the program containing the vtable
+	 * @param vtable the vtable
+	 * @param mode determines how the table is chosen
+	 * @return the index for function table
+	 */
+	private static int getVtableIndex(Program program, Vtable vtable, VtableMode mode) {
+		Function[][] functionTable = vtable.getFunctionTables();
+		if (functionTable.length == 0) {
+			return 0; // No function tables, return with 0 early
+		}
+		if (functionTable.length == 1) {
+			return 0; // Single function table, return with 0 early
+		}
+
+		if (mode == VtableMode.VS) {
+			return getVSVtableIndex(program, vtable);
+		}
+
+		if (mode == VtableMode.GCC) {
+			return getGCCVtableIndex(program, vtable);
+		}
+		return 0; // Zeroth table is also default if mode isn't supported
+	}
+
 	/**
 	 * Gets the DataType representation of the _vptr for the specified ClassTypeInfo.
 	 * @param program the program containing the ClassTypeInfo
@@ -517,31 +524,35 @@ public class ClassTypeInfoUtils {
 				new CategoryPath(TypeInfoUtils.getCategoryPath(type), type.getName());
 			DataTypeManager dtm = program.getDataTypeManager();
 			String name = type.getName() + "::" + VtableModel.SYMBOL_NAME;
-			//name = name + "_t";
 			Structure struct = new StructureDataType(path, name, 0, dtm);
-			Function[][] functionTable = vtable.getFunctionTables();
-			int i = getTableIndex(program, vtable, mode);
-			if (functionTable.length > 0 && functionTable[i].length > 0) {
-				for (Function function : functionTable[i]) {
-					if (function != null) {
-						String uniqueName = getUniqueName(function, functionTable[i], struct);
-						if (isPureFunction(function)) {
-							DataType dt = dtm.getPointer(VoidDataType.dataType);
+			Function[][] functionTables = vtable.getFunctionTables();
+			int i = getVtableIndex(program, vtable, mode);
+			if (functionTables.length > 0) {
+				Function[] functionTable = functionTables[i];
+				if (functionTable.length > 0) {
+					for (Function function : functionTable) {
+						if (function != null) {
+							String uniqueName = getUniqueName(function, functionTable, struct);
+							if (isPureFunction(function)) {
+								DataType dt = dtm.getPointer(VoidDataType.dataType);
+								struct.add(dt, dt.getLength(), uniqueName, null);
+								continue;
+							}
+							DataType dt = new FunctionDefinitionDataType(function, false);
+							dt.setCategoryPath(path);
+							processFunctionDefinitionName(dt);
+							if (dtm.contains(dt)) {
+								dt = dtm.getDataType(dt.getDataTypePath());
+							}
+							else {
+								dt = dtm.resolve(dt, DataTypeConflictHandler.KEEP_HANDLER);
+							}
+							dt = dtm.getPointer(dt);
 							struct.add(dt, dt.getLength(), uniqueName, null);
-							continue;
 						}
-						DataType dt = new FunctionDefinitionDataType(function, false);
-						dt.setCategoryPath(path);
-						processFunctionDefinitionName(dt);
-						if (dtm.contains(dt)) {
-							dt = dtm.getDataType(dt.getDataTypePath());
-						} else {
-							dt = dtm.resolve(dt, DataTypeConflictHandler.KEEP_HANDLER);
+						else {
+							struct.add(PointerDataType.dataType);
 						}
-						dt = dtm.getPointer(dt);
-						struct.add(dt, dt.getLength(), uniqueName, null);
-					} else {
-						struct.add(PointerDataType.dataType);
 					}
 				}
 			}
