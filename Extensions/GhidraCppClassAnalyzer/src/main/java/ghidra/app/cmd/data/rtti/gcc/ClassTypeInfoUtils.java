@@ -8,17 +8,14 @@ import cppclassanalyzer.data.ProgramClassTypeInfoManager;
 import cppclassanalyzer.data.typeinfo.GnuClassTypeInfoDB;
 import cppclassanalyzer.data.typeinfo.AbstractClassTypeInfoDB.TypeId;
 import cppclassanalyzer.utils.CppClassAnalyzerUtils;
+import cppclassanalyzer.vs.VsClassTypeInfo;
+import ghidra.app.cmd.data.rtti.*;
 import ghidra.app.util.demangler.DemangledObject;
 import ghidra.app.util.demangler.DemanglerUtil;
-import ghidra.docking.settings.Settings;
 import ghidra.program.model.address.AddressSpace;
-import ghidra.program.model.mem.MemoryAccessException;
 import ghidra.util.InvalidNameException;
 import util.CollectionUtils;
 
-import ghidra.app.cmd.data.rtti.ClassTypeInfo;
-import ghidra.app.cmd.data.rtti.GnuVtable;
-import ghidra.app.cmd.data.rtti.Vtable;
 import ghidra.app.cmd.data.rtti.gcc.typeinfo.BaseClassTypeInfoModel;
 import ghidra.app.cmd.data.rtti.gcc.typeinfo.VmiClassTypeInfoModel;
 import ghidra.app.cmd.disassemble.DisassembleCommand;
@@ -433,51 +430,87 @@ public class ClassTypeInfoUtils {
 		return unique;
 	}
 
+	// vftable_meta_ptr -> &RTTICompleteObjectLocator
+	private static Address VSMetaToRTTI4(Program program, Address meta) {
+		Memory memory = program.getMemory();
+		AddressSpace space = meta.getAddressSpace();
+		int pointerLength = meta.getPointerSize();
+		DataType numericPointerDatatype = UnsignedIntegerDataType.getUnsignedDataType(pointerLength, program.getDataTypeManager());
+		if (!(numericPointerDatatype instanceof AbstractUnsignedIntegerDataType)) {
+			throw new AssertException("Expected some unsigned integer datatype");
+		}
+		MemBuffer buffer = new DumbMemBufferImpl(memory, meta);
+		Object value = numericPointerDatatype.getValue(buffer, numericPointerDatatype.getDefaultSettings(), numericPointerDatatype.getLength());
+		if (!(value instanceof Scalar)) {
+			throw new AssertException("Expected scalar datatype");
+		}
+		return space.getAddress(((Scalar) value).getValue());
+	}
+
+	// vftable -> vftable_meta_ptr
+	private static Address VSVtableToMeta(Program program, Address vtable) {
+		int pointerLength = vtable.getPointerSize();
+		return vtable.subtract(pointerLength);
+	}
+
+	// &RTTICompleteObjectLocator -> offset
+	private static long VSRTTI4ToOffset(Program program, Address rtti4) {
+		Memory memory = program.getMemory();
+		DataType dwordDataType = DWordDataType.dataType;
+		Address offset = rtti4.add(4);
+		MemBuffer buffer = new DumbMemBufferImpl(memory, offset);
+		Object value = dwordDataType.getValue(buffer, dwordDataType.getDefaultSettings(), dwordDataType.getLength());
+		if (!(value instanceof Scalar)) {
+			throw new AssertException("Expected scalar datatype");
+		}
+		return ((Scalar) value).getValue();
+	}
+
+	// &origin -> &vtable_prefix
+	private static Address GCCOriginToVtablePrefix(Program program, Address origin) {
+		DataType ptrDiffDatatype = GnuUtils.getPtrDiff_t(program.getDataTypeManager());
+		return origin.subtract(ptrDiffDatatype.getLength() * 2);
+	}
+
+	// &vtable_prefix -> whole_object
+	private static long GCCVtablePrefixToWholeObject(Program program, Address vtablePrefix) {
+		Memory memory = program.getMemory();
+		DataType ptrDiffDatatype = GnuUtils.getPtrDiff_t(program.getDataTypeManager());
+		MemBuffer buffer = new DumbMemBufferImpl(memory, vtablePrefix);
+		Object value = ptrDiffDatatype.getValue(buffer, ptrDiffDatatype.getDefaultSettings(), ptrDiffDatatype.getLength());
+		if (!(value instanceof Scalar)) {
+			throw new AssertException("Expected scalar datatype");
+		}
+		return ((Scalar) value).getValue();
+	}
+
 	private static int getVSVtableIndex(Program program, Vtable vtable) {
 		try {
-			Memory memory = program.getMemory();
 			Address[] addresses = vtable.getTableAddresses();
 			for (int i = 0; i < addresses.length; i++) {
 				Address address = addresses[i];
-				AddressSpace space = address.getAddressSpace();
-				int pointerLength = address.getPointerSize();
-				Address metaAddress = address.subtract(pointerLength);
-				MemBuffer buffer = new DumbMemBufferImpl(memory, metaAddress);
-				if (pointerLength > 8) {
-					throw new AssertException("Expected scalar datatype");
-				}
-				long value = buffer.getBigInteger(0, pointerLength, false).longValue();
-				Address locatoraddress = space.getAddress(value);
-				Address offsetAddress = locatoraddress.add(4);
-				buffer = new DumbMemBufferImpl(memory, offsetAddress);
-				value = buffer.getBigInteger(0, 4, false).longValue();
-				CodeUnit unit = program.getListing().getCodeUnitAt(locatoraddress);
-				if (value == 0) {
+				Address metaAddress = VSVtableToMeta(program, address);
+				address = VSMetaToRTTI4(program, metaAddress);
+				Rtti4Model locator = new Rtti4Model(program, address, VsClassTypeInfo.DEFAULT_OPTIONS);
+				long offset = locator.getVbTableOffset();
+				if (offset == 0) {
 					return i;
 				}
 			}
+			return 0;
+		} catch (InvalidDataTypeException e) {
+			// This must never ever occur in release
+			throw new AssertException("Error parsing one of RTTI structs");
 		}
-		catch (MemoryAccessException e) {}
-		return 0;
 	}
 
 	private static int getGCCVtableIndex(Program program, Vtable vtable) {
-		Memory memory = program.getMemory();
-		DataType ptrDiff = GnuUtils.getPtrDiff_t(program.getDataTypeManager());
-		int ptrdiffLength = ptrDiff.getLength();
-		Settings settings = ptrDiff.getDefaultSettings();
 		Address[] addresses = vtable.getTableAddresses();
 		for (int i = 0; i < addresses.length; i++) {
 			Address addr = addresses[i];
-			int pointerLength = addr.getPointerSize();
-			Address diffAddr = addr.subtract(pointerLength * 2);
-			MemBuffer buffer = new DumbMemBufferImpl(memory, diffAddr);
-			Object value = ptrDiff.getValue(buffer, settings, ptrdiffLength);
-			if (!(value instanceof Scalar)) {
-				throw new AssertException("Expected scalar datatype");
-			}
-			Scalar scalarValue = (Scalar) value;
-			if (scalarValue.getValue() == 0) {
+			Address prefixAddr = GCCOriginToVtablePrefix(program, addr);
+			long wholeObject = GCCVtablePrefixToWholeObject(program, prefixAddr);
+			if (wholeObject == 0) {
 				return i;
 			}
 		}
@@ -493,11 +526,8 @@ public class ClassTypeInfoUtils {
 	 */
 	private static int getVtableIndex(Program program, Vtable vtable, VtableMode mode) {
 		Function[][] functionTable = vtable.getFunctionTables();
-		if (functionTable.length == 0) {
-			return 0; // No function tables, return with 0 early
-		}
-		if (functionTable.length == 1) {
-			return 0; // Single function table, return with 0 early
+		if (functionTable.length <= 1) {
+			return 0; // Single or no function table, just return with 0
 		}
 
 		if (mode == VtableMode.VS) {
@@ -507,7 +537,46 @@ public class ClassTypeInfoUtils {
 		if (mode == VtableMode.GCC) {
 			return getGCCVtableIndex(program, vtable);
 		}
-		return 0; // Zeroth table is also default if mode isn't supported
+		return 0; // Return with 0 by default
+	}
+
+	private static ClassTypeInfo getVSVtableParentClass(Program program, int index, Vtable vtable) {
+		try {
+			Address[] addresses = vtable.getTableAddresses();
+			Address address = addresses[index];
+			Address metaAddress = VSVtableToMeta(program, address);
+			address = VSMetaToRTTI4(program, metaAddress);
+			Rtti4Model locator = new Rtti4Model(program, address, VsClassTypeInfo.DEFAULT_OPTIONS);
+			Address currentTypeDescriptorAddress = locator.getRtti0Address();
+			address = locator.getRtti3Address();
+			Rtti3Model classHierarchyDescriptor = new Rtti3Model(program, address, VsClassTypeInfo.DEFAULT_OPTIONS);
+			long numBaseClasses = classHierarchyDescriptor.getRtti1Count();
+			if (numBaseClasses == 0) {
+				throw new AssertException("Expected 1 or more base classes inside RTTIClassHierarchyDescriptor instance");
+			}
+			if (numBaseClasses == 1) {
+				return null;
+			}
+			address = classHierarchyDescriptor.getRtti2Address();
+			Rtti2Model baseClassArray = new Rtti2Model(program, (int)numBaseClasses, address, VsClassTypeInfo.DEFAULT_OPTIONS);
+			address = baseClassArray.getRtti1Address(0);
+			Rtti1Model selfBase = new Rtti1Model(program, address, VsClassTypeInfo.DEFAULT_OPTIONS);
+			Address selfTypeDescriptor = selfBase.getRtti0Address();
+			if (!currentTypeDescriptorAddress.equals(selfTypeDescriptor)) {
+				return null;
+			}
+			return null;
+		} catch (InvalidDataTypeException e) {
+			// This must never ever occur in release
+			throw new AssertException("Error parsing one of RTTI structs");
+		}
+	}
+
+	private static ClassTypeInfo getVtableParentClass(Program program, Vtable vtable, int index, VtableMode mode) {
+		if (mode == VtableMode.VS) {
+			return getVSVtableParentClass(program, index, vtable);
+		}
+		return null;
 	}
 
 	/**
@@ -520,13 +589,14 @@ public class ClassTypeInfoUtils {
 	public static DataType getVptrDataType(Program program, ClassTypeInfo type, VtableMode mode) {
 		try {
 			Vtable vtable = type.getVtable();
+			int i = getVtableIndex(program, vtable, mode);
+			getVtableParentClass(program, vtable, i, mode);
 			CategoryPath path =
 				new CategoryPath(TypeInfoUtils.getCategoryPath(type), type.getName());
 			DataTypeManager dtm = program.getDataTypeManager();
 			String name = type.getName() + "::" + VtableModel.SYMBOL_NAME;
 			Structure struct = new StructureDataType(path, name, 0, dtm);
 			Function[][] functionTables = vtable.getFunctionTables();
-			int i = getVtableIndex(program, vtable, mode);
 			if (functionTables.length > 0) {
 				Function[] functionTable = functionTables[i];
 				if (functionTable.length > 0) {
