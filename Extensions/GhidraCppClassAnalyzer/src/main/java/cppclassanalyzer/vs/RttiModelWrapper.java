@@ -342,9 +342,11 @@ public final class RttiModelWrapper implements VsClassTypeInfo {
 		for (int i = 1; i < baseCount; i++) {
 			Rtti1Model model = baseArray.getRtti1Model(i);
 			ClassTypeInfo parent = wrapNoExcept(model);
-			result.addAll(parent.getVirtualParents());
 			if (isVirtual(model)) {
 				result.add(wrapNoExcept(model));
+			}
+			else {
+				result.addAll(parent.getVirtualParents());
 			}
 		}
 		return result;
