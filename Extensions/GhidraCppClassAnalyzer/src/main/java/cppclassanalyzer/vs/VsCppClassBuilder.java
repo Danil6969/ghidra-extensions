@@ -39,7 +39,7 @@ public class VsCppClassBuilder extends AbstractCppClassBuilder {
 		}
 	}
 
-	private int getSliceOffset(DataType parentDatatype, int offset) {
+	private int getSliceOffset(DataType parentDatatype) {
 		if (!(parentDatatype instanceof Structure)) {
 			return -1;
 		}
@@ -48,37 +48,50 @@ public class VsCppClassBuilder extends AbstractCppClassBuilder {
 			return -1;
 		}
 		int pointerSize = manager.getDataOrganization().getPointerSize();
-		Structure novtableDatatype = (Structure) parentDatatype;
-		int sliceOffset = offset + pointerSize;
-		if (novtableDatatype.getLength() <= sliceOffset) {
+		Structure parentStructure = (Structure) parentDatatype;
+		int sliceOffset = pointerSize;
+		if (parentStructure.getLength() <= sliceOffset) {
 			return -1;
 		}
-		DataTypeComponent sliceComp = novtableDatatype.getComponentContaining(sliceOffset);
+		DataTypeComponent sliceComp = parentStructure.getComponentContaining(sliceOffset);
 		if (sliceComp.getOffset() != sliceOffset) {
 			return -1;
 		}
 		return sliceOffset;
 	}
 
-	private Structure getNovtableDatatype(DataType parentDatatype, int offset, ClassTypeInfoManager classManager) {
+	private String getNonSuperName(String name) {
+		if (name.startsWith(SUPER)) {
+			name = name.substring(SUPER.length());
+		}
+		return name;
+	}
+
+	private Structure getNovtableDatatype(DataType parentDatatype) {
 		try {
-			int sliceOffset = getSliceOffset(parentDatatype, offset);
+			int sliceOffset = getSliceOffset(parentDatatype);
 			if (sliceOffset < 0) {
 				return null;
 			}
 			CategoryPath newPath = new CategoryPath(parentDatatype.getCategoryPath(), parentDatatype.getName());
-			String newName = NOVTABLE + parentDatatype.getName();
-			StructureDataType novtableDatatype = new StructureDataType(newPath, newName, parentDatatype.getLength(), parentDatatype.getDataTypeManager());
-			novtableDatatype.replaceWith(parentDatatype);
+			String newName = NOVFPTR + getNonSuperName(parentDatatype.getName());
+			Structure novtableDatatype = new StructureDataType(newPath, newName, 0, parentDatatype.getDataTypeManager());
 			novtableDatatype.setCategoryPath(newPath);
-			novtableDatatype.setName(NOVTABLE + parentDatatype.getName());
-			DataTypeComponent sliceComp = novtableDatatype.getComponentContaining(sliceOffset);
-			int sliceOrdinal = sliceComp.getOrdinal();
-			for (int i = 0; i < sliceOrdinal; i++) {
-				novtableDatatype.clearComponent(i);
+			novtableDatatype.setName(newName);
+			Structure parentStructure = ((Structure) parentDatatype);
+			DataTypeComponent sliceComponent = parentStructure.getComponentContaining(sliceOffset);
+			int sliceOrdinal = sliceComponent.getOrdinal();
+			int number = parentStructure.getNumComponents();
+			for (int i = sliceOrdinal; i < number; i++) {
+				DataTypeComponent parentComponent = parentStructure.getComponent(i);
+				DataType componentDatatype = parentComponent.getDataType();
+				int componentLength = parentComponent.getLength();
+				String componentName = parentComponent.getFieldName();
+				String componentComment = parentComponent.getComment();
+				novtableDatatype.add(componentDatatype, componentLength, componentName, componentComment);
 			}
 			return novtableDatatype;
-		} catch (InvalidNameException e) {
+		} catch (InvalidNameException | DuplicateNameException e) {
 			return null;
 		}
 	}
@@ -97,11 +110,12 @@ public class VsCppClassBuilder extends AbstractCppClassBuilder {
 				}
 				ClassTypeInfoManager classManager = ((ClassTypeInfoDB) type).getManager();
 				DataType parentDatatype = component.getDataType();
-				Structure novtableDatatype = getNovtableDatatype(parentDatatype, offset, classManager);
-				if (novtableDatatype != null) {
-					;
-				}
+				Structure novtableDatatype = getNovtableDatatype(parentDatatype);
 				struct.clearComponent(component.getOrdinal());
+				if (novtableDatatype != null) {
+					String newName = NOVFPTR + getNonSuperName(parentDatatype.getName());
+					replaceComponent(struct, novtableDatatype, newName, offset + getSliceOffset(parentDatatype));
+				}
 			}
 			replaceComponent(struct, vfptr, VFPTR, offset);
 		}
@@ -118,7 +132,7 @@ public class VsCppClassBuilder extends AbstractCppClassBuilder {
 		DataTypeComponent comp = struct.getComponentContaining(offset);
 		if (comp == null || isUndefined(comp.getDataType())) {
 			replaceComponent(struct, vbptr, VBPTR, offset);
-		} else if (comp.getFieldName() == null || !comp.getFieldName().startsWith(SUPER)) {
+		} else if (comp.getFieldName() == null || (!comp.getFieldName().startsWith(SUPER) && !comp.getFieldName().startsWith(NOVFPTR))) {
 			replaceComponent(struct, vbptr, VBPTR, offset);
 		}
 	}
