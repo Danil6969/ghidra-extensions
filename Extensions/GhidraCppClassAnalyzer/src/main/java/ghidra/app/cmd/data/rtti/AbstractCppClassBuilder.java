@@ -26,6 +26,7 @@ public abstract class AbstractCppClassBuilder {
 
 	public static final String SUPER = "super::";
 	public static final String NOVFPTR = "novfptr::";
+	public static final String NOVBPTR = "novbptr::";
 
 	private final Program program;
 	protected Structure struct;
