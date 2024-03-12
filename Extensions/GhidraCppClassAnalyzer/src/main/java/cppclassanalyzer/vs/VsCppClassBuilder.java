@@ -51,7 +51,7 @@ public class VsCppClassBuilder extends AbstractCppClassBuilder {
 		Structure parentStructure = (Structure) parentDatatype;
 		int sliceOffset = pointerSize;
 		if (parentStructure.getLength() <= sliceOffset) {
-			return -1;
+			return sliceOffset;
 		}
 		DataTypeComponent sliceComp = parentStructure.getComponentContaining(sliceOffset);
 		if (sliceComp.getOffset() != sliceOffset) {
@@ -60,26 +60,41 @@ public class VsCppClassBuilder extends AbstractCppClassBuilder {
 		return sliceOffset;
 	}
 
-	private String getNonSuperName(String name) {
+	private String getPureSuperName(String name) {
 		if (name.startsWith(SUPER)) {
 			name = name.substring(SUPER.length());
+		}
+		if (name.startsWith(NOVFPTR)) {
+			name = name.substring(NOVFPTR.length());
+		}
+		if (name.startsWith(NOVBPTR)) {
+			name = name.substring(NOVBPTR.length());
 		}
 		return name;
 	}
 
-	private Structure getNovtableDatatype(DataType parentDatatype) {
+	private Structure getSlicedDatatype(DataType parentDatatype, String prefix) {
 		try {
 			int sliceOffset = getSliceOffset(parentDatatype);
 			if (sliceOffset < 0) {
 				return null;
 			}
 			CategoryPath newPath = new CategoryPath(parentDatatype.getCategoryPath(), parentDatatype.getName());
-			String newName = NOVFPTR + getNonSuperName(parentDatatype.getName());
+			String newName = prefix + getPureSuperName(parentDatatype.getName());
+			DataType existingDatatype = parentDatatype.getDataTypeManager().getDataType(newPath, newName);
+			if (existingDatatype != null) {
+				if (existingDatatype instanceof Structure) {
+					return (Structure) existingDatatype;
+				}
+			}
 			Structure novtableDatatype = new StructureDataType(newPath, newName, 0, parentDatatype.getDataTypeManager());
 			novtableDatatype.setCategoryPath(newPath);
 			novtableDatatype.setName(newName);
 			Structure parentStructure = ((Structure) parentDatatype);
 			DataTypeComponent sliceComponent = parentStructure.getComponentContaining(sliceOffset);
+			if (sliceComponent == null) {
+				return novtableDatatype;
+			}
 			int sliceOrdinal = sliceComponent.getOrdinal();
 			int number = parentStructure.getNumComponents();
 			for (int i = sliceOrdinal; i < number; i++) {
@@ -100,20 +115,17 @@ public class VsCppClassBuilder extends AbstractCppClassBuilder {
 		ClassTypeInfo type = getType();
 		Program program = getProgram();
 		DataType vfptr = ClassTypeInfoUtils.getVptrDataType(program, type, ClassTypeInfoUtils.VtableMode.VS);
-		DataTypeComponent component = struct.getComponentContaining(offset);
-		if (component == null || isUndefined(component.getDataType())) {
+		DataTypeComponent comp = struct.getComponentContaining(offset);
+		if (comp == null || isUndefined(comp.getDataType())) {
 			replaceComponent(struct, vfptr, VFPTR, offset);
-		} else {
-			if (component.getFieldName().startsWith(SUPER)) {
-				if (!(type instanceof ClassTypeInfoDB)) {
-					throw new AssertException("No way to get manager");
-				}
-				ClassTypeInfoManager classManager = ((ClassTypeInfoDB) type).getManager();
-				DataType parentDatatype = component.getDataType();
-				Structure novtableDatatype = getNovtableDatatype(parentDatatype);
-				struct.clearComponent(component.getOrdinal());
+		}
+		else {
+			if (comp.getFieldName().startsWith(SUPER)) {
+				DataType parentDatatype = comp.getDataType();
+				Structure novtableDatatype = getSlicedDatatype(parentDatatype, NOVFPTR);
+				struct.clearComponent(comp.getOrdinal());
 				if (novtableDatatype != null) {
-					String newName = NOVFPTR + getNonSuperName(parentDatatype.getName());
+					String newName = NOVFPTR + getPureSuperName(parentDatatype.getName());
 					replaceComponent(struct, novtableDatatype, newName, offset + getSliceOffset(parentDatatype));
 				}
 			}
@@ -132,7 +144,17 @@ public class VsCppClassBuilder extends AbstractCppClassBuilder {
 		DataTypeComponent comp = struct.getComponentContaining(offset);
 		if (comp == null || isUndefined(comp.getDataType())) {
 			replaceComponent(struct, vbptr, VBPTR, offset);
-		} else if (comp.getFieldName() == null || (!comp.getFieldName().startsWith(SUPER) && !comp.getFieldName().startsWith(NOVFPTR))) {
+		}
+		else {
+			if (comp.getFieldName().startsWith(NOVFPTR)) {
+				DataType parentDatatype = comp.getDataType();
+				Structure novtableDatatype = getSlicedDatatype(parentDatatype, NOVBPTR);
+				struct.clearComponent(comp.getOrdinal());
+				if (novtableDatatype != null) {
+					String newName = NOVBPTR + getPureSuperName(parentDatatype.getName());
+					replaceComponent(struct, novtableDatatype, newName, offset + getSliceOffset(parentDatatype));
+				}
+			}
 			replaceComponent(struct, vbptr, VBPTR, offset);
 		}
 	}
