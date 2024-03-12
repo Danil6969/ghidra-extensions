@@ -25,6 +25,7 @@ import ghidra.util.exception.DuplicateNameException;
 public abstract class AbstractCppClassBuilder {
 
 	public static final String SUPER = "super::";
+	public static final String NOVTABLE = "novtable::";
 
 	private final Program program;
 	protected Structure struct;
