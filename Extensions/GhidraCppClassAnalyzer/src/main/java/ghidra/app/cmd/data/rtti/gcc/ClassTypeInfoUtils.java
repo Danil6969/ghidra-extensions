@@ -625,7 +625,7 @@ public class ClassTypeInfoUtils {
 			String name = type.getName() + "::" + VtableModel.SYMBOL_NAME;
 			Structure struct = new StructureDataType(path, name, 0, dtm);
 			if (parentVtable != null) {
-				struct.add(parentVtable, "super::" + parentClass, "");
+				struct.add(parentVtable, AbstractCppClassBuilder.SUPER + parentClass, "");
 			}
 			Function[][] functionTables = vtable.getFunctionTables();
 			if (functionTables.length > 0) {
