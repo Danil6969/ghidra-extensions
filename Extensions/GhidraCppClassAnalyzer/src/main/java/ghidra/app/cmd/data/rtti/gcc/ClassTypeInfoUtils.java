@@ -4,11 +4,14 @@ import java.util.*;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import cppclassanalyzer.data.ClassTypeInfoManager;
 import cppclassanalyzer.data.ProgramClassTypeInfoManager;
+import cppclassanalyzer.data.typeinfo.ClassTypeInfoDB;
 import cppclassanalyzer.data.typeinfo.GnuClassTypeInfoDB;
 import cppclassanalyzer.data.typeinfo.AbstractClassTypeInfoDB.TypeId;
 import cppclassanalyzer.utils.CppClassAnalyzerUtils;
 import cppclassanalyzer.vs.VsClassTypeInfo;
+import ghidra.app.cmd.data.TypeDescriptorModel;
 import ghidra.app.cmd.data.rtti.*;
 import ghidra.app.util.demangler.DemangledObject;
 import ghidra.app.util.demangler.DemanglerUtil;
@@ -488,9 +491,8 @@ public class ClassTypeInfoUtils {
 		try {
 			Address[] addresses = vtable.getTableAddresses();
 			for (int i = 0; i < addresses.length; i++) {
-				Address address = addresses[i];
-				Address metaAddress = VSVtableToMeta(program, address);
-				address = VSMetaToRTTI4(program, metaAddress);
+				Address metaAddress = VSVtableToMeta(program, addresses[i]);
+				Address address = VSMetaToRTTI4(program, metaAddress);
 				Rtti4Model locator = new Rtti4Model(program, address, VsClassTypeInfo.DEFAULT_OPTIONS);
 				long offset = locator.getVbTableOffset();
 				if (offset == 0) {
@@ -499,7 +501,6 @@ public class ClassTypeInfoUtils {
 			}
 			return 0;
 		} catch (InvalidDataTypeException e) {
-			// This must never ever occur in release
 			throw new AssertException("Error parsing one of RTTI structs");
 		}
 	}
@@ -540,41 +541,59 @@ public class ClassTypeInfoUtils {
 		return 0; // Return with 0 by default
 	}
 
-	private static ClassTypeInfo getVSVtableParentClass(Program program, int index, Vtable vtable) {
+	private static ClassTypeInfo getVSVtableParentClass(Program program, ClassTypeInfoManager manager, int index, Vtable vtable) {
 		try {
 			Address[] addresses = vtable.getTableAddresses();
-			Address address = addresses[index];
-			Address metaAddress = VSVtableToMeta(program, address);
-			address = VSMetaToRTTI4(program, metaAddress);
+			Address metaAddress = VSVtableToMeta(program, addresses[index]);
+			Address address = VSMetaToRTTI4(program, metaAddress);
 			Rtti4Model locator = new Rtti4Model(program, address, VsClassTypeInfo.DEFAULT_OPTIONS);
-			Address currentTypeDescriptorAddress = locator.getRtti0Address();
-			address = locator.getRtti3Address();
-			Rtti3Model classHierarchyDescriptor = new Rtti3Model(program, address, VsClassTypeInfo.DEFAULT_OPTIONS);
-			long numBaseClasses = classHierarchyDescriptor.getRtti1Count();
+			Rtti3Model classHierarchyDescriptor = locator.getRtti3Model();
+			int numBaseClasses = classHierarchyDescriptor.getRtti1Count();
 			if (numBaseClasses == 0) {
 				throw new AssertException("Expected 1 or more base classes inside RTTIClassHierarchyDescriptor instance");
 			}
 			if (numBaseClasses == 1) {
 				return null;
 			}
-			address = classHierarchyDescriptor.getRtti2Address();
-			Rtti2Model baseClassArray = new Rtti2Model(program, (int)numBaseClasses, address, VsClassTypeInfo.DEFAULT_OPTIONS);
-			address = baseClassArray.getRtti1Address(0);
-			Rtti1Model selfBase = new Rtti1Model(program, address, VsClassTypeInfo.DEFAULT_OPTIONS);
-			Address selfTypeDescriptor = selfBase.getRtti0Address();
-			if (!currentTypeDescriptorAddress.equals(selfTypeDescriptor)) {
-				return null;
+			Rtti2Model baseClassArray = classHierarchyDescriptor.getRtti2Model();
+			Rtti1Model selfBase = baseClassArray.getRtti1Model(0);
+			if (!locator.getRtti0Address().equals(selfBase.getRtti0Address())) {
+				throw new AssertException("Expected self type at 0 index in its base class array");
+			}
+			int selfMDisp = selfBase.getMDisp();
+			int selfPDisp = selfBase.getPDisp();
+			int selfVDisp = selfBase.getVDisp();
+			int selfAttributes = selfBase.getAttributes();
+			for (int i = 1; i < numBaseClasses; i++) {
+				Rtti1Model currentBase = baseClassArray.getRtti1Model(i);
+				if (currentBase.getMDisp() != selfMDisp) {
+					continue;
+				}
+				if (currentBase.getPDisp() != selfPDisp) {
+					continue;
+				}
+				if (currentBase.getVDisp() != selfVDisp) {
+					continue;
+				}
+				if (currentBase.getAttributes() != selfAttributes) {
+					continue;
+				}
+				TypeDescriptorModel currentTypeDescriptor = currentBase.getRtti0Model();
+				Namespace namespace = currentTypeDescriptor.getDescriptorAsNamespace();
+				if (!(namespace instanceof GhidraClass)) {
+					return null;
+				}
+				return manager.getType((GhidraClass) namespace);
 			}
 			return null;
 		} catch (InvalidDataTypeException e) {
-			// This must never ever occur in release
 			throw new AssertException("Error parsing one of RTTI structs");
 		}
 	}
 
-	private static ClassTypeInfo getVtableParentClass(Program program, Vtable vtable, int index, VtableMode mode) {
+	private static ClassTypeInfo getVtableParentClass(Program program, ClassTypeInfoManager manager, Vtable vtable, int index, VtableMode mode) {
 		if (mode == VtableMode.VS) {
-			return getVSVtableParentClass(program, index, vtable);
+			return getVSVtableParentClass(program, manager, index, vtable);
 		}
 		return null;
 	}
@@ -590,7 +609,10 @@ public class ClassTypeInfoUtils {
 		try {
 			Vtable vtable = type.getVtable();
 			int i = getVtableIndex(program, vtable, mode);
-			getVtableParentClass(program, vtable, i, mode);
+			if (!(type instanceof ClassTypeInfoDB)) {
+				throw new AssertException("No way to get manager");
+			}
+			getVtableParentClass(program, ((ClassTypeInfoDB) type).getManager(), vtable, i, mode);
 			CategoryPath path =
 				new CategoryPath(TypeInfoUtils.getCategoryPath(type), type.getName());
 			DataTypeManager dtm = program.getDataTypeManager();
