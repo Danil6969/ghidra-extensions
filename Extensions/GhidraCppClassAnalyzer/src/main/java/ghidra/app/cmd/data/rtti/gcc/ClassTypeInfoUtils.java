@@ -581,7 +581,7 @@ public class ClassTypeInfoUtils {
 				TypeDescriptorModel currentTypeDescriptor = currentBase.getRtti0Model();
 				Namespace namespace = currentTypeDescriptor.getDescriptorAsNamespace();
 				if (!(namespace instanceof GhidraClass)) {
-					return null;
+					throw new AssertException("Failed to get class information for valid aliasing base");
 				}
 				return manager.getType((GhidraClass) namespace);
 			}
@@ -612,39 +612,63 @@ public class ClassTypeInfoUtils {
 			if (!(type instanceof ClassTypeInfoDB)) {
 				throw new AssertException("No way to get manager");
 			}
-			getVtableParentClass(program, ((ClassTypeInfoDB) type).getManager(), vtable, i, mode);
+			DataType parentVtable = null;
+			ClassTypeInfo parentClass = getVtableParentClass(program, ((ClassTypeInfoDB) type).getManager(), vtable, i, mode);
+			if (parentClass != null) {
+				if (Vtable.isValid(parentClass.getVtable())) {
+					parentVtable = getVptrDataType(program, parentClass, mode);
+				}
+			}
 			CategoryPath path =
 				new CategoryPath(TypeInfoUtils.getCategoryPath(type), type.getName());
 			DataTypeManager dtm = program.getDataTypeManager();
 			String name = type.getName() + "::" + VtableModel.SYMBOL_NAME;
 			Structure struct = new StructureDataType(path, name, 0, dtm);
+			if (parentVtable != null) {
+				struct.add(parentVtable, "super::" + parentClass, "");
+			}
 			Function[][] functionTables = vtable.getFunctionTables();
 			if (functionTables.length > 0) {
 				Function[] functionTable = functionTables[i];
 				if (functionTable.length > 0) {
+					int offset = 0;
+					int pointerSize = dtm.getDataOrganization().getPointerSize();
 					for (Function function : functionTable) {
+						boolean shouldSkip = false;
+						if (parentVtable != null) {
+							if (offset < parentVtable.getLength()) {
+								shouldSkip = true;
+							}
+						}
 						if (function != null) {
 							String uniqueName = getUniqueName(function, functionTable, struct);
 							if (isPureFunction(function)) {
 								DataType dt = dtm.getPointer(VoidDataType.dataType);
-								struct.add(dt, dt.getLength(), uniqueName, null);
-								continue;
-							}
-							DataType dt = new FunctionDefinitionDataType(function, false);
-							dt.setCategoryPath(path);
-							processFunctionDefinitionName(dt);
-							if (dtm.contains(dt)) {
-								dt = dtm.getDataType(dt.getDataTypePath());
+								if (!shouldSkip) {
+									struct.add(dt, dt.getLength(), uniqueName, null);
+								}
 							}
 							else {
-								dt = dtm.resolve(dt, DataTypeConflictHandler.KEEP_HANDLER);
+								DataType dt = new FunctionDefinitionDataType(function, false);
+								dt.setCategoryPath(path);
+								processFunctionDefinitionName(dt);
+								if (dtm.contains(dt)) {
+									dt = dtm.getDataType(dt.getDataTypePath());
+								} else {
+									dt = dtm.resolve(dt, DataTypeConflictHandler.KEEP_HANDLER);
+								}
+								dt = dtm.getPointer(dt);
+								if (!shouldSkip) {
+									struct.add(dt, dt.getLength(), uniqueName, null);
+								}
 							}
-							dt = dtm.getPointer(dt);
-							struct.add(dt, dt.getLength(), uniqueName, null);
 						}
 						else {
-							struct.add(PointerDataType.dataType);
+							if (!shouldSkip) {
+								struct.add(PointerDataType.dataType);
+							}
 						}
+						offset += pointerSize;
 					}
 				}
 			}
