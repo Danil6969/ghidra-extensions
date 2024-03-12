@@ -71,7 +71,7 @@ public abstract class ClassTypeInfoDB extends DatabaseObject implements ClassTyp
 		if (!dtm.containsCategory(path)) {
 			return struct;
 		}
-		DataType superStruct = dtm.getDataType(path, AbstractCppClassBuilder.SUPER + struct.getName() + "_t");
+		DataType superStruct = dtm.getDataType(path, AbstractCppClassBuilder.SUPER + struct.getName());
 		return superStruct != null ? (Structure) superStruct : struct;
 	}
 
