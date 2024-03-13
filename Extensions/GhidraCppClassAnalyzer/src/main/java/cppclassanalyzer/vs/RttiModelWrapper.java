@@ -367,9 +367,13 @@ public final class RttiModelWrapper implements VsClassTypeInfo {
 		Set<ClassTypeInfo> vParents = getVirtualParents();
 		if (!vParents.isEmpty()) {
 			List<Rtti4Model> models = getCompleteObjectLocators();
-			if (models.get(0).getVbTableOffset() != 0 && models.get(models.size()-1).getVbTableOffset() == 0) {
-				// Have reversed list, must reverse again
-				Collections.reverse(models);
+			if (models.size() > 0) {
+				if (models.get(0).getVbTableOffset() != 0) {
+					if (models.get(models.size() - 1).getVbTableOffset() == 0) {
+						// Have reversed list, must reverse again
+						Collections.reverse(models);
+					}
+				}
 			}
 			if (models.size() >= vParents.size()) {
 				models = models.subList(models.size() - vParents.size(), models.size());
