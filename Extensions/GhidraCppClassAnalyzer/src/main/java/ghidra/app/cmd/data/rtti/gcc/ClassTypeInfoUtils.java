@@ -616,7 +616,10 @@ public class ClassTypeInfoUtils {
 			ClassTypeInfo parentClass = getVtableParentClass(program, ((ClassTypeInfoDB) type).getManager(), vtable, i, mode);
 			if (parentClass != null) {
 				if (Vtable.isValid(parentClass.getVtable())) {
-					parentVtable = getVptrDataType(program, parentClass, mode);
+					DataType parentVptr = getVptrDataType(program, parentClass, mode);
+					if (parentVptr instanceof Pointer) {
+						parentVtable = ((Pointer) parentVptr).getDataType();
+					}
 				}
 			}
 			CategoryPath path =
