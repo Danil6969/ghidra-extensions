@@ -6,24 +6,15 @@ import java.util.stream.Stream;
 
 import javax.swing.Icon;
 
+import org.apache.commons.io.FilenameUtils;
+
 import ghidra.app.cmd.data.rtti.ClassTypeInfo;
 import ghidra.app.cmd.data.rtti.Vtable;
 import ghidra.app.plugin.core.datamgr.archive.Archive;
 import ghidra.app.plugin.core.datamgr.archive.FileArchive;
-import cppclassanalyzer.plugin.typemgr.node.TypeInfoTreeNodeManager;
-import cppclassanalyzer.service.ClassTypeInfoManagerService;
-
 import ghidra.framework.data.OpenMode;
 import ghidra.framework.store.db.PackedDBHandle;
 import ghidra.framework.store.db.PackedDatabase;
-
-import cppclassanalyzer.data.ProgramClassTypeInfoManager;
-import cppclassanalyzer.data.manager.caches.ArchivedRttiCachePair;
-import cppclassanalyzer.data.manager.tables.ArchivedRttiTablePair;
-import cppclassanalyzer.data.typeinfo.ArchivedClassTypeInfo;
-import cppclassanalyzer.data.typeinfo.ClassTypeInfoDB;
-import cppclassanalyzer.data.typeinfo.GnuClassTypeInfoDB;
-import cppclassanalyzer.data.vtable.ArchivedGnuVtable;
 import ghidra.program.model.data.DataTypeManager;
 import ghidra.program.model.data.StandAloneDataTypeManager;
 import ghidra.program.model.listing.Function;
@@ -33,14 +24,22 @@ import ghidra.util.exception.AssertException;
 import ghidra.util.exception.CancelledException;
 import ghidra.util.task.TaskMonitor;
 
-import org.apache.commons.io.FilenameUtils;
-
+import cppclassanalyzer.data.ProgramClassTypeInfoManager;
+import cppclassanalyzer.data.manager.caches.ArchivedRttiCachePair;
+import cppclassanalyzer.data.manager.tables.ArchivedRttiTablePair;
+import cppclassanalyzer.data.typeinfo.ArchivedClassTypeInfo;
+import cppclassanalyzer.data.typeinfo.ClassTypeInfoDB;
+import cppclassanalyzer.data.typeinfo.GnuClassTypeInfoDB;
+import cppclassanalyzer.data.vtable.ArchivedGnuVtable;
 import cppclassanalyzer.database.schema.ArchivedClassTypeInfoSchema;
 import cppclassanalyzer.database.schema.ArchivedGnuVtableSchema;
 import cppclassanalyzer.database.tables.ArchivedClassTypeInfoDatabaseTable;
 import cppclassanalyzer.database.tables.ArchivedGnuVtableDatabaseTable;
 import cppclassanalyzer.database.utils.TransactionHandler;
 import cppclassanalyzer.plugin.ClassTypeInfoManagerPlugin;
+import cppclassanalyzer.plugin.typemgr.node.TypeInfoTreeNodeManager;
+import cppclassanalyzer.service.ClassTypeInfoManagerService;
+
 import db.DBHandle;
 import db.Table;
 import generic.jar.ResourceFile;
