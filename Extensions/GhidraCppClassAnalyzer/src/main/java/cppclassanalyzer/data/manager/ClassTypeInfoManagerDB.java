@@ -7,24 +7,14 @@ import java.util.stream.Stream;
 
 import javax.swing.Icon;
 
+import ghidra.framework.data.OpenMode;
 import ghidra.app.cmd.data.rtti.*;
-
-import cppclassanalyzer.plugin.typemgr.node.TypeInfoTreeNodeManager;
-import cppclassanalyzer.service.ClassTypeInfoManagerService;
-import db.*;
-
 import ghidra.program.database.ManagerDB;
 import ghidra.program.database.ProgramDB;
-import cppclassanalyzer.data.ProgramClassTypeInfoManager;
-import cppclassanalyzer.data.manager.caches.ProgramRttiCachePair;
-import cppclassanalyzer.data.manager.recordmanagers.ProgramRttiRecordManager;
-import cppclassanalyzer.data.manager.tables.ProgramRttiTablePair;
-import cppclassanalyzer.data.typeinfo.*;
-import cppclassanalyzer.data.vtable.*;
 import ghidra.program.database.map.AddressMap;
 import ghidra.program.model.address.Address;
 import ghidra.program.model.address.AddressOverflowException;
-import ghidra.program.model.data.*;
+import ghidra.program.model.data.GenericCallingConvention;
 import ghidra.program.model.listing.*;
 import ghidra.program.model.symbol.*;
 import ghidra.util.Msg;
@@ -33,6 +23,12 @@ import ghidra.util.datastruct.LongArrayList;
 import ghidra.util.exception.*;
 import ghidra.util.task.TaskMonitor;
 
+import cppclassanalyzer.data.ProgramClassTypeInfoManager;
+import cppclassanalyzer.data.manager.caches.ProgramRttiCachePair;
+import cppclassanalyzer.data.manager.recordmanagers.ProgramRttiRecordManager;
+import cppclassanalyzer.data.manager.tables.ProgramRttiTablePair;
+import cppclassanalyzer.data.typeinfo.*;
+import cppclassanalyzer.data.vtable.*;
 import cppclassanalyzer.database.record.ClassTypeInfoRecord;
 import cppclassanalyzer.database.record.VtableRecord;
 import cppclassanalyzer.database.schema.ClassTypeInfoSchema;
@@ -45,6 +41,10 @@ import cppclassanalyzer.database.utils.TransactionHandler;
 import cppclassanalyzer.plugin.ClassTypeInfoManagerPlugin;
 import cppclassanalyzer.plugin.TypeInfoArchiveChangeRecord;
 import cppclassanalyzer.plugin.TypeInfoArchiveChangeRecord.ChangeType;
+import cppclassanalyzer.plugin.typemgr.node.TypeInfoTreeNodeManager;
+import cppclassanalyzer.service.ClassTypeInfoManagerService;
+
+import db.*;
 import resources.ResourceManager;
 import util.CollectionUtils;
 
@@ -242,7 +242,7 @@ public abstract class ClassTypeInfoManagerDB implements ManagerDB, ProgramClassT
 	}
 
 	@Override
-	public void programReady(int openMode, int currentRevision, TaskMonitor monitor)
+	public void programReady(OpenMode openMode, int currentRevision, TaskMonitor monitor)
 			throws IOException, CancelledException {
 		// do nothing
 	}
