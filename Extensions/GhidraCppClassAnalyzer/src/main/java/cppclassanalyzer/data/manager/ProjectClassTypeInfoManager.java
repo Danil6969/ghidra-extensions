@@ -10,27 +10,17 @@ import ghidra.app.cmd.data.rtti.ClassTypeInfo;
 import ghidra.app.cmd.data.rtti.gcc.UnresolvedClassTypeInfoException;
 import ghidra.app.plugin.core.datamgr.archive.Archive;
 import ghidra.app.plugin.core.datamgr.archive.ProjectArchive;
-import cppclassanalyzer.plugin.typemgr.node.TypeInfoTreeNodeManager;
-import cppclassanalyzer.service.ClassTypeInfoManagerService;
-
 import ghidra.framework.cmd.BackgroundCommand;
+import ghidra.framework.data.OpenMode;
 import ghidra.framework.model.DomainObjectListener;
 import ghidra.framework.plugintool.PluginTool;
 import ghidra.program.database.DataTypeArchiveDB;
 import ghidra.program.database.ProjectDataTypeManager;
-
-import cppclassanalyzer.data.ArchivedRttiData;
-import cppclassanalyzer.data.ClassTypeInfoManager;
-import cppclassanalyzer.data.ProgramClassTypeInfoManager;
-import cppclassanalyzer.data.manager.tables.ArchivedRttiTablePair;
-import cppclassanalyzer.data.typeinfo.ArchivedClassTypeInfo;
-import cppclassanalyzer.data.typeinfo.ClassTypeInfoDB;
-import cppclassanalyzer.data.vtable.ArchivedGnuVtable;
 import ghidra.program.model.listing.Function;
 import ghidra.program.model.listing.GhidraClass;
 import ghidra.program.model.listing.Program;
 import ghidra.program.model.symbol.Namespace;
-import ghidra.program.util.ChangeManager;
+import ghidra.program.util.ProgramEvent;
 import ghidra.util.InvalidNameException;
 import ghidra.util.Lock;
 import ghidra.util.Msg;
@@ -41,12 +31,22 @@ import ghidra.util.exception.VersionException;
 import ghidra.util.task.CancelOnlyWrappingTaskMonitor;
 import ghidra.util.task.TaskMonitor;
 
+import cppclassanalyzer.data.ArchivedRttiData;
+import cppclassanalyzer.data.ClassTypeInfoManager;
+import cppclassanalyzer.data.ProgramClassTypeInfoManager;
+import cppclassanalyzer.data.manager.tables.ArchivedRttiTablePair;
+import cppclassanalyzer.data.typeinfo.ArchivedClassTypeInfo;
+import cppclassanalyzer.data.typeinfo.ClassTypeInfoDB;
+import cppclassanalyzer.data.vtable.ArchivedGnuVtable;
 import cppclassanalyzer.database.schema.ArchivedClassTypeInfoSchema;
 import cppclassanalyzer.database.schema.ArchivedGnuVtableSchema;
 import cppclassanalyzer.database.tables.ArchivedClassTypeInfoDatabaseTable;
 import cppclassanalyzer.database.tables.ArchivedGnuVtableDatabaseTable;
 import cppclassanalyzer.database.utils.TransactionHandler;
 import cppclassanalyzer.plugin.ClassTypeInfoManagerPlugin;
+import cppclassanalyzer.plugin.typemgr.node.TypeInfoTreeNodeManager;
+import cppclassanalyzer.service.ClassTypeInfoManagerService;
+
 import db.*;
 import resources.ResourceManager;
 
@@ -78,7 +78,7 @@ public final class ProjectClassTypeInfoManager extends ProjectDataTypeManager
 
 	private ProjectClassTypeInfoManager(ClassTypeInfoManagerService service, ProjectArchive archive)
 			throws CancelledException, VersionException, IOException {
-		super(getDB(archive), getDBHandle(archive), DBConstants.UPDATE, getDB(archive),
+		super(getDB(archive), getDBHandle(archive), OpenMode.UPDATE, getDB(archive),
 			getLock(archive), TaskMonitor.DUMMY);
 		this.archive = archive;
 		this.plugin = service;
@@ -389,7 +389,7 @@ public final class ProjectClassTypeInfoManager extends ProjectDataTypeManager
 		lock.acquire();
 		try {
 			Table table = createLibMapTable(getDBHandle(archive));
-			getDB(archive).setChanged(ChangeManager.DOCR_OBJECT_CREATED, null, table);
+			getDB(archive).setChanged(ProgramEvent.SYMBOL_ADDED, null, table);
 		} finally {
 			lock.release();
 		}
