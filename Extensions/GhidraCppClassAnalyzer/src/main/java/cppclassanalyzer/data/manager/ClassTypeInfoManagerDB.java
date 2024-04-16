@@ -7,8 +7,8 @@ import java.util.stream.Stream;
 
 import javax.swing.Icon;
 
-import ghidra.framework.data.OpenMode;
 import ghidra.app.cmd.data.rtti.*;
+import ghidra.framework.data.OpenMode;
 import ghidra.program.database.ManagerDB;
 import ghidra.program.database.ProgramDB;
 import ghidra.program.database.map.AddressMap;
