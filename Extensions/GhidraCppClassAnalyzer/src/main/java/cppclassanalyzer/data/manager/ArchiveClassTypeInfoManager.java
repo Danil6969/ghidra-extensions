@@ -13,6 +13,7 @@ import ghidra.app.plugin.core.datamgr.archive.FileArchive;
 import cppclassanalyzer.plugin.typemgr.node.TypeInfoTreeNodeManager;
 import cppclassanalyzer.service.ClassTypeInfoManagerService;
 
+import ghidra.framework.data.OpenMode;
 import ghidra.framework.store.db.PackedDBHandle;
 import ghidra.framework.store.db.PackedDatabase;
 
@@ -40,7 +41,6 @@ import cppclassanalyzer.database.tables.ArchivedClassTypeInfoDatabaseTable;
 import cppclassanalyzer.database.tables.ArchivedGnuVtableDatabaseTable;
 import cppclassanalyzer.database.utils.TransactionHandler;
 import cppclassanalyzer.plugin.ClassTypeInfoManagerPlugin;
-import db.DBConstants;
 import db.DBHandle;
 import db.Table;
 import generic.jar.ResourceFile;
@@ -62,7 +62,7 @@ public final class ArchiveClassTypeInfoManager extends StandAloneDataTypeManager
 	private final TypeInfoTreeNodeManager treeNodeManager;
 
 	private ArchiveClassTypeInfoManager(ClassTypeInfoManagerService plugin,
-			File file, int openMode, TaskMonitor monitor) throws IOException, CancelledException {
+			File file, OpenMode openMode, TaskMonitor monitor) throws IOException, CancelledException {
 		super(new ResourceFile(file), openMode, monitor);
 		this.plugin = plugin;
 		this.file = file;
@@ -135,7 +135,7 @@ public final class ArchiveClassTypeInfoManager extends StandAloneDataTypeManager
 	public static ArchiveClassTypeInfoManager createManager(ClassTypeInfoManagerService plugin,
 			File file) throws IOException {
 		try {
-			return new ArchiveClassTypeInfoManager(plugin, file, DBConstants.CREATE, TaskMonitor.DUMMY);
+			return new ArchiveClassTypeInfoManager(plugin, file, OpenMode.CREATE, TaskMonitor.DUMMY);
 		} catch (CancelledException e) {
 			throw new AssertException(e); // unexpected without task monitor use
 		}
@@ -153,7 +153,7 @@ public final class ArchiveClassTypeInfoManager extends StandAloneDataTypeManager
 
 	public static ArchiveClassTypeInfoManager open(ClassTypeInfoManagerService plugin, File file,
 			boolean openForUpdate) throws IOException {
-		int mode = openForUpdate ? DBConstants.UPDATE : DBConstants.READ_ONLY;
+		OpenMode mode = openForUpdate ? OpenMode.UPDATE : OpenMode.IMMUTABLE;
 		try {
 			return new ArchiveClassTypeInfoManager(plugin, file, mode, TaskMonitor.DUMMY);
 		} catch (CancelledException e) {
