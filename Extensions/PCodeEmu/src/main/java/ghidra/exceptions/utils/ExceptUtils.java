@@ -30,14 +30,22 @@ public class ExceptUtils {
 	public static final int FLAG_CLEARED	= 0;
 	public static final int FLAG_TRY		= 1;
 	public static final int FLAG_CATCH		= 2;
-	public static final int FLAG_FINALLY	= 3;
-	public static final int FLAG_EXCEPT		= 4;
-	public static final int FLAG_ON			= 5;
+	public static final int FLAG_EXCEPT		= 3;
+	public static final int FLAG_ON			= 4;
+	public static final int FLAG_FINALLY	= 5;
 	public static final int FLAG_MIN		= FLAG_TRY;
 	public static final int FLAG_MAX		= FLAG_ON;
 
 	public static void setExceptFlags(Program program, TaskMonitor monitor, Address start, Address end) {
 		setFlags(program, monitor, start, end, FLAG_EXCEPT, 0);
+		String str = getDecompiledC(program, start, monitor);
+		if (str == null) {
+			return;
+		}
+		if (!str.contains("!except(")) {
+			return;
+		}
+		setFlags(program, monitor, start, end, FLAG_EXCEPT, 1);
 	}
 
 	public static void setCatchFlags(Program program, TaskMonitor monitor, Address start, Address end) {
@@ -108,11 +116,14 @@ public class ExceptUtils {
 	 * @param val the new register value to wait for.
 	 * @return amount of value fetches required.
 	 */
-	public static long waitContextRegister(ProgramContext con, Register reg, Address addr, BigInteger val) {
+	public static long waitContextRegister(ProgramContext con, TaskMonitor monitor, Register reg, Address addr, BigInteger val) {
 		boolean signed = val.compareTo(BigInteger.ZERO) < 0; // Only negative values require a sign
 		BigInteger cur = con.getValue(reg, addr, signed);
 		long repeats = 0;
 		while (cur == null || !cur.equals(val)) {
+			if (monitor.isCancelled()) {
+				return repeats;
+			}
 			cur = con.getValue(reg, addr, signed);
 			repeats++;
 		}
@@ -131,7 +142,11 @@ public class ExceptUtils {
 
 			ProgramContext context = program.getProgramContext();
 			context.setValue(register, address, address, value);
-			waitContextRegister(context, register, address, value);
+			waitContextRegister(context, monitor, register, address, value);
+
+			if (monitor.isCancelled()) {
+				return;
+			}
 
 			DisassembleCommand disassembleCommand = new DisassembleCommand(address, null, true);
 			disassembleCommand.applyTo(program, monitor);
