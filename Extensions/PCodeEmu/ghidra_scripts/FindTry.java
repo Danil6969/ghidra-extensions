@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 //@category Exceptions
-package exceptions.seh;
 
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.Address;

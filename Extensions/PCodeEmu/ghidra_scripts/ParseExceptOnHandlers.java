@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 //@category Exceptions
-package exceptions.seh.delphi;
 
 import ghidra.app.script.GhidraScript;
 
