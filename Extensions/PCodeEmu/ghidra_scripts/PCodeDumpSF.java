@@ -15,7 +15,6 @@
  */
 //Decompile the function at the cursor and its callees, then output facts files corresponding to the pcodes
 //@category PCode
-package util;
 
 import java.io.File;
 import java.io.FileNotFoundException;
