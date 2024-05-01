@@ -1,12 +1,12 @@
 package ghidra.app.plugin.prototype;
 
-import ghidra.app.cmd.data.rtti.borland.delphi.datatype.*;
 import ghidra.app.cmd.data.rtti.borland.delphi.util.*;
 import ghidra.app.services.*;
 import ghidra.app.util.importer.MessageLog;
 import ghidra.pcode.utils.Utils;
 import ghidra.program.model.address.*;
 import ghidra.program.model.data.*;
+import ghidra.program.model.data.delphi.*;
 import ghidra.program.model.listing.*;
 import ghidra.program.model.mem.*;
 import ghidra.program.model.reloc.*;
