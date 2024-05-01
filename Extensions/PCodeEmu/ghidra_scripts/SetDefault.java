@@ -14,7 +14,6 @@
  * limitations under the License.
  */
 //@category Exceptions
-package exceptions;
 
 import ghidra.exceptions.utils.ExceptUtils;
 import ghidra.app.script.GhidraScript;
