@@ -408,6 +408,10 @@ public class ClassTypeInfoUtils {
 				countInTable++;
 			}
 		}
+		// Strip name
+		if (name.startsWith("thunk_")) {
+			name = name.substring("thunk_".length());
+		}
 		int countInStructure = 0;
 		for (DataTypeComponent component : components) {
 			String another = component.getFieldName();
@@ -423,11 +427,13 @@ public class ClassTypeInfoUtils {
 				}
 			}
 		}
-		if (countInTable < 2) {
-			if (countInStructure > 0) {
-				throw new AssertException("Mismatch between count in table and structure");
+		if (!(countInTable == 1 && countInStructure == 1)) {
+			if (countInTable < 2) {
+				if (countInStructure > 0) {
+					throw new AssertException("Mismatch between count in table and structure");
+				}
+				return name;
 			}
-			return name;
 		}
 		String unique = name + "_" + countInStructure;
 		return unique;
@@ -654,6 +660,9 @@ public class ClassTypeInfoUtils {
 							else {
 								DataType dt = new FunctionDefinitionDataType(function, false);
 								dt.setCategoryPath(path);
+								if (dt.getName().contains("thunk_")) {
+									dt.setName(dt.getName().substring("thunk_".length()));
+								}
 								processFunctionDefinitionName(dt);
 								if (dtm.contains(dt)) {
 									dt = dtm.getDataType(dt.getDataTypePath());
@@ -681,7 +690,7 @@ public class ClassTypeInfoUtils {
 			}
 			struct = (Structure) dtm.resolve(struct, handler);
 			return dtm.getPointer(struct);
-		} catch (DuplicateNameException e) {
+		} catch (DuplicateNameException | InvalidNameException e) {
 			throw new AssertException("Ghidra-Cpp-Class-Analyzer: "+e.getMessage(), e);
 		}
 	}
