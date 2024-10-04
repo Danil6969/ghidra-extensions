@@ -7,6 +7,7 @@ import java.util.Collections;
 import docking.Tool;
 import ghidra.program.model.data.DataType;
 import ghidra.app.cmd.data.rtti.GnuVtable;
+import ghidra.app.services.ProgramManager;
 import ghidra.app.util.datatype.microsoft.MSDataTypeUtils;
 import ghidra.app.util.demangler.*;
 import ghidra.framework.main.AppInfo;
@@ -30,7 +31,6 @@ import ghidra.util.task.TaskMonitor;
 import cppclassanalyzer.utils.CppClassAnalyzerUtils;
 
 import static ghidra.app.util.demangler.DemanglerUtil.demangle;
-import static ghidra.plugins.fsbrowser.FSBUtils.getProgramManager;
 import static ghidra.program.model.data.DataTypeConflictHandler.KEEP_HANDLER;
 
 /**
@@ -326,7 +326,7 @@ public final class GnuUtils {
 		Tool[] tools = project.getToolManager().getRunningTools();
 		for (Tool tool : tools) {
 			if (tool instanceof PluginTool) {
-				return getProgramManager((PluginTool) tool, false).openProgram(file);
+				return tool.getService(ProgramManager.class).openProgram(file);
 			}
 		}
 		return null;
