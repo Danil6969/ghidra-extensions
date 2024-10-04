@@ -189,7 +189,7 @@ public class LibraryLinker {
 		long imageSize = 0;
 		try {
 			Address imageBase = program.getImageBase();
-			imageSize = DefaultModuleMapProposal.DefaultModuleMapEntry.computeImageSize(program);
+			imageSize = DefaultModuleMapProposal.DefaultModuleMapEntry.computeImageRange(program).getLength();
 			start = imageBase;
 			AddressRange range = new AddressRangeImpl(start, imageSize);
 			for (TraceModule conflictModule = getConflictModule(range, modules);
