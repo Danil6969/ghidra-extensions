@@ -188,9 +188,11 @@ public class VsCppClassAnalyzer extends AbstractCppClassAnalyzer {
 
 		void process(TypeDescriptorModel descriptor) throws CancelledException {
 			try {
-				if (!REF_TYPES.contains(descriptor.getRefType())) {
-					return;
-				}
+				String typeDescriptor = descriptor.getDemangledTypeDescriptor();
+				if (!typeDescriptor.startsWith("union"))
+					if (!typeDescriptor.startsWith("struct"))
+						if (!typeDescriptor.startsWith("class"))
+							return;
 				descriptor.validate();
 			} catch (InvalidDataTypeException | NullPointerException e) {
 				return;
