@@ -270,8 +270,9 @@ define pcodeop insertind;
 	RI7_RT[104,8] = 0x12;
 	RI7_RT[112,8] = 0x11;
 	RI7_RT[120,8] = 0x10;
+	b:1 = 0x03;
 	# Indices are swapped using the formula: 16 - sizeof(byte) - i = 16 - 1 - i = 15 - i
-	RI7_RT = insertind(RI7_RT,0x03:1,15 - t);
+	RI7_RT = insertind(RI7_RT,b,15 - t);
 }
 
 # cbx rt,ra,rb
@@ -286,8 +287,9 @@ define pcodeop insertind;
 		i = i + 1;
 		goto <loop>;
 	<loop_end>
+	b:1 = 0x03;
 	# Indices are swapped using the formula: 16 - sizeof(byte) - i = 16 - 1 - i = 15 - i
-	RR_RT = insertind(RR_RT,0x03:1,15 - t);
+	RR_RT = insertind(RR_RT,b,15 - t);
 }
 
 # chd rt,symbol(ra)
@@ -302,8 +304,9 @@ define pcodeop insertind;
 		i = i + 1;
 		goto <loop>;
 	<loop_end>
+	b:2 = 0x0203;
 	# Indices are swapped using the formula: 16 - sizeof(halfword) - i = 16 - 2 - i = 14 - i
-	RI7_RT = insertind(RI7_RT,0x0203:2,14 - t);
+	RI7_RT = insertind(RI7_RT,b,14 - t);
 }
 
 # chx rt,ra,rb
@@ -318,8 +321,9 @@ define pcodeop insertind;
 		i = i + 1;
 		goto <loop>;
 	<loop_end>
+	b:2 = 0x0203;
 	# Indices are swapped using the formula: 16 - sizeof(halfword) - i = 16 - 2 - i = 14 - i
-	RR_RT = insertind(RR_RT,0x0203:2,14 - t);
+	RR_RT = insertind(RR_RT,b,14 - t);
 }
 
 # cwd rt,symbol(ra)
@@ -330,8 +334,9 @@ define pcodeop insertind;
 	RI7_RT[32,32] = 0x18191A1B;
 	RI7_RT[64,32] = 0x14151617;
 	RI7_RT[96,32] = 0x10111213;
+	b:4 = 0x00010203;
 	# Indices are swapped using the formula: 16 - sizeof(word) - i = 16 - 4 - i = 12 - i
-	RI7_RT = insertind(RI7_RT,0x00010203:4,12 - t);
+	RI7_RT = insertind(RI7_RT,b,12 - t);
 }
 
 # cwx rt,ra,rb
@@ -346,8 +351,9 @@ define pcodeop insertind;
 		i = i + 1;
 		goto <loop>;
 	<loop_end>
+	b:4 = 0x00010203;
 	# Indices are swapped using the formula: 16 - sizeof(word) - i = 16 - 4 - i = 12 - i
-	RR_RT = insertind(RR_RT,0x00010203:4,12 - t);
+	RR_RT = insertind(RR_RT,b,12 - t);
 }
 
 # cdd rt,symbol(ra)
@@ -362,8 +368,9 @@ define pcodeop insertind;
 		i = i + 1;
 		goto <loop>;
 	<loop_end>
+	b:8 = 0x0001020304050607;
 	# Indices are swapped using the formula: 16 - sizeof(doubleword) - i = 16 - 8 - i = 8 - i
-	RI7_RT = insertind(RI7_RT,0x0001020304050607:8,8 - t);
+	RI7_RT = insertind(RI7_RT,b,8 - t);
 }
 
 # cdx rt,ra,rb
@@ -378,8 +385,9 @@ define pcodeop insertind;
 		i = i + 1;
 		goto <loop>;
 	<loop_end>
+	b:8 = 0x0001020304050607;
 	# Indices are swapped using the formula: 16 - sizeof(doubleword) - i = 16 - 8 - i = 8 - i
-	RR_RT = insertind(RR_RT,0x0001020304050607:8,8 - t);
+	RR_RT = insertind(RR_RT,b,8 - t);
 }
 
 
