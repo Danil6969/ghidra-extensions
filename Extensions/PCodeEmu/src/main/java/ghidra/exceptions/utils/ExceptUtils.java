@@ -34,7 +34,7 @@ public class ExceptUtils {
 	public static final int FLAG_ON			= 4;
 	public static final int FLAG_FINALLY	= 5;
 	public static final int FLAG_MIN		= FLAG_TRY;
-	public static final int FLAG_MAX		= FLAG_ON;
+	public static final int FLAG_MAX		= FLAG_FINALLY;
 
 	public static void setExceptFlags(Program program, TaskMonitor monitor, Address start, Address end) {
 		setFlags(program, monitor, start, end, FLAG_EXCEPT, 0);
