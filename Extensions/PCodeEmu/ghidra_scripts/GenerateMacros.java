@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+import exceptionanalyzer.utils.ExceptUtils;
 import ghidra.app.script.GhidraScript;
-import ghidra.exceptions.utils.ExceptUtils;
 
 import java.util.ArrayList;
 import java.util.List;
