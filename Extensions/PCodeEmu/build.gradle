@@ -7,4 +7,5 @@ eclipse.project.name = 'PCode Emulator'
 dependencies {
 	api project(':Debugger')
 	api project(':Decompiler')
+	api project(':GhidraCppClassAnalyzer')
 }
