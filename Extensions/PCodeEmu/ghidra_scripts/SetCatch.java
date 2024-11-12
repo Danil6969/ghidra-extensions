@@ -15,17 +15,13 @@
  */
 //@category Exceptions
 
-import ghidra.exceptions.utils.ExceptUtils;
+import exceptionanalyzer.utils.ExceptUtils;
 import ghidra.app.script.GhidraScript;
 import ghidra.program.model.address.Address;
-import ghidra.program.model.listing.*;
-
-import java.math.BigInteger;
 
 public class SetCatch extends GhidraScript {
 	@Override
 	protected void run() throws Exception {
-		Listing lst = currentProgram.getListing();
 		if (currentSelection == null) {
 			if (currentAddress != null) {
 				ExceptUtils.setCatchFlags(currentProgram, monitor, currentAddress, null);
