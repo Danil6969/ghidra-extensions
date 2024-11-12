@@ -15,19 +15,15 @@
  */
 //@category Exceptions
 
-import ghidra.exceptions.utils.ExceptUtils;
+import exceptionanalyzer.utils.ExceptUtils;
 import ghidra.app.script.GhidraScript;
-import ghidra.program.model.listing.*;
 
 public class SetDefault extends GhidraScript {
 	@Override
 	protected void run() throws Exception {
-		Listing lst = currentProgram.getListing();
-		if (currentSelection == null) {
-			if (currentAddress != null) {
-				ExceptUtils.setFlags(currentProgram, monitor, currentAddress,
+		if (currentAddress != null) {
+			ExceptUtils.setFlags(currentProgram, monitor, currentAddress,
 						currentAddress, ExceptUtils.FLAG_CLEARED, 0);
-			}
 		}
 	}
 }
