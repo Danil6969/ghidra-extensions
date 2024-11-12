@@ -17,9 +17,10 @@ public class ExceptUtils {
 	public static final int FLAG_CLEARED		= 0;
 	public static final int FLAG_TRY			= 1;
 	public static final int FLAG_CATCH			= 2;
-	public static final int FLAG_EXCEPT			= 3;
-	public static final int FLAG_ON				= 4;
-	public static final int FLAG_FINALLY		= 5;
+	public static final int FLAG_UNWIND			= 3;
+	public static final int FLAG_EXCEPT			= 4;
+	public static final int FLAG_ON				= 5;
+	public static final int FLAG_FINALLY		= 6;
 	public static final int FLAG_MIN			= FLAG_TRY;
 	public static final int FLAG_MAX			= FLAG_FINALLY;
 
@@ -175,6 +176,18 @@ public class ExceptUtils {
 			return;
 		}
 		setFlags(program, monitor, start, end, FLAG_CATCH, 1);
+	}
+
+	public static void setUnwindFlags(Program program, TaskMonitor monitor, Address start, Address end) {
+		setFlags(program, monitor, start, end, FLAG_UNWIND, 0);
+		String str = getDecompiledC(program, start, monitor);
+		if (str == null) {
+			return;
+		}
+		if (!str.contains("!unwind(")) {
+			return;
+		}
+		setFlags(program, monitor, start, end, FLAG_UNWIND, 1);
 	}
 
 	public static void setExceptFlags(Program program, TaskMonitor monitor, Address start, Address end) {
