@@ -37,7 +37,9 @@ public class ExceptUtils {
 			return null;
 		}
 		DecompileResults dr = ifc.decompileFunction(func, options.getDefaultTimeout(), monitor);
-		return dr.getDecompiledFunction().getC();
+		String result = dr.getDecompiledFunction().getC();
+		ifc.closeProgram();
+		return result;
 	}
 
 	public static Function findFunction(Program program, Address address, TaskMonitor monitor) {
