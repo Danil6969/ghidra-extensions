@@ -313,7 +313,8 @@ public class ItaniumAbiRttiScanner implements RttiScanner {
 			monitor.setMessage("Locating vtable for "+typeinfo.getName());
 			Vtable vtable = typeinfo.findVtable(dummy);
 			if (!Vtable.isValid(vtable)) {
-				throw new Exception("Vtable for "+typeinfo.getFullName()+" not found");
+				log.appendMsg("Vtable for "+typeinfo.getFullName()+" not found");
+				return Collections.emptySet();
 			}
 			return GnuUtils.getDirectDataReferences(
 				program, vtable.getTableAddresses()[0], dummy);
