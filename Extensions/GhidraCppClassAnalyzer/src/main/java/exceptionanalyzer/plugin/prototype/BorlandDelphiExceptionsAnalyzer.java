@@ -13,13 +13,13 @@ import ghidra.util.task.TaskMonitor;
 
 import java.util.*;
 
-public class BorlandDelphiExceptionAnalyzer extends AbstractAnalyzer {
+public class BorlandDelphiExceptionsAnalyzer extends AbstractAnalyzer {
 
 	private static final String ANALYZER_NAME = "Borland Delphi Exceptions Analyzer (32 bit)";
 	private static final String DESCRIPTION =
 		"This analyzer finds and creates all of the exception handlers and their associated tables.";
 
-	public BorlandDelphiExceptionAnalyzer() {
+	public BorlandDelphiExceptionsAnalyzer() {
 		super(ANALYZER_NAME, DESCRIPTION, AnalyzerType.BYTE_ANALYZER);
 	}
 
