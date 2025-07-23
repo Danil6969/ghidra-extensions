@@ -168,6 +168,18 @@ public class ExceptUtils {
 		setFlags(program, monitor, start, val1, val2, val3);
 	}
 
+	public static void setTryFlags(Program program, TaskMonitor monitor, Address start, Address end) {
+		setFlags(program, monitor, start, end, FLAG_TRY, 0);
+		String str = getDecompiledC(program, start, monitor);
+		if (str == null) {
+			return;
+		}
+		if (!str.contains("!try(")) {
+			return;
+		}
+		setFlags(program, monitor, start, end, FLAG_TRY, 1);
+	}
+
 	public static void setCatchFlags(Program program, TaskMonitor monitor, Address start, Address end) {
 		setFlags(program, monitor, start, end, FLAG_CATCH, 0);
 		String str = getDecompiledC(program, start, monitor);
@@ -216,4 +228,15 @@ public class ExceptUtils {
 		setFlags(program, monitor, start, end, FLAG_ON, 1);
 	}
 
+	public static void setFinallyFlags(Program program, TaskMonitor monitor, Address start, Address end) {
+		setFlags(program, monitor, start, end, FLAG_FINALLY, 0);
+		String str = getDecompiledC(program, start, monitor);
+		if (str == null) {
+			return;
+		}
+		if (!str.contains("!finally(")) {
+			return;
+		}
+		setFlags(program, monitor, start, end, FLAG_FINALLY, 1);
+	}
 }
