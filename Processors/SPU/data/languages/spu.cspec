@@ -255,7 +255,13 @@
             </input>
             
             <output>
-                <pentry minsize="1" maxsize="16" extension="sign">
+                <pentry minsize="1" maxsize="4" extension="sign">
+                    <register name="r3.x"/>
+                </pentry>
+                <pentry minsize="5" maxsize="8" extension="sign">
+                    <addr space="join" piece1="r3.x" piece2="r3.y"/>
+                </pentry>
+                <pentry minsize="9" maxsize="16" extension="sign">
                     <register name="r3"/>
                 </pentry>
             </output>
