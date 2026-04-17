@@ -73,15 +73,23 @@ public class VsCppClassBuilder extends AbstractCppClassBuilder {
 
 	private Structure getNovtableDatatype(DataType parentDatatype, String prefix) {
 		try {
-			CategoryPath newPath = new CategoryPath(parentDatatype.getCategoryPath(), parentDatatype.getName());
-			String newName = prefix + parentDatatype.getName();
-			DataType existingDatatype = parentDatatype.getDataTypeManager().getDataType(newPath, newName);
+			DataTypeManager manager = parentDatatype.getDataTypeManager();
+			CategoryPath parentPath = parentDatatype.getCategoryPath();
+			String parentName = getPureSuperName(parentDatatype.getName());
+			if (!parentName.equals(parentDatatype.getName())) {
+				if (parentPath.getParent() != null) {
+					parentPath = parentPath.getParent();
+				}
+			}
+			String newName = prefix + parentName;
+			CategoryPath newPath = new CategoryPath(parentPath, parentName);
+			DataType existingDatatype = manager.getDataType(newPath, newName);
 			if (existingDatatype != null) {
 				if (existingDatatype instanceof Structure) {
 					return (Structure) existingDatatype;
 				}
 			}
-			Structure novtableDatatype = new StructureDataType(newPath, newName, 0, parentDatatype.getDataTypeManager());
+			Structure novtableDatatype = new StructureDataType(newPath, newName, 0, manager);
 			novtableDatatype.setCategoryPath(newPath);
 			novtableDatatype.setName(newName);
 			return novtableDatatype;
