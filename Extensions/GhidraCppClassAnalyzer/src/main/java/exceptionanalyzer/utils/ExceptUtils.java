@@ -239,4 +239,10 @@ public class ExceptUtils {
 		}
 		setFlags(program, monitor, start, end, FLAG_FINALLY, 1);
 	}
+
+	public static void setTypeFlag(Program program, TaskMonitor monitor, Address start, Address end) {
+		if (end == null) { // Assume we are clearing type
+			;
+		}
+	}
 }
